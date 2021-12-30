@@ -14,7 +14,7 @@ import javax.persistence.*;
 public class Platform {
     @Id
     @Column(name = "platform_idx")
-    private Long platformIdx;
+    private int platformIdx;
 
     @Column(name="platform_name")
     private String platformName;
