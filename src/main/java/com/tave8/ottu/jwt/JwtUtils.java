@@ -1,5 +1,6 @@
 package com.tave8.ottu.jwt;
 
+import com.tave8.ottu.entity.Genre;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -37,6 +39,20 @@ public class JwtUtils {
         return jwt;
     }
 
+    // 로그인 시에 토큰 생성
+    public String makeLoginJwtToken(String nickname, String kakaotalkId, List<Genre> genre){
+        String jwt = Jwts.builder()
+                .setHeaderParam(Header.TYPE,Header.JWT_TYPE)
+                .setIssuer("ottu")
+                .setIssuedAt(new Date())
+                .claim("nickname",nickname)
+                .claim("kakaotalkId",kakaotalkId)
+                .claim("genres",genre)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+        return jwt;
+    }
+    // 토큰에서 회원 정보 추출
     public Claims getClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)

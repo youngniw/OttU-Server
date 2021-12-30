@@ -36,9 +36,14 @@ public class User {
     @Column(name = "is_first", columnDefinition = "boolean default true")
     private Boolean isFirst;
 
+
     @ManyToMany
     @JoinTable(name = "user_genre", joinColumns = @JoinColumn(name = "user_idx"), inverseJoinColumns = @JoinColumn(name = "genre_idx"))
     private List<Genre> genres = new ArrayList<>();
+
+    public List<Genre> getGenre(){
+        return genres;
+    }
 
 
     @PrePersist
@@ -46,6 +51,8 @@ public class User {
         this.reliability = this.reliability == null ? 10 : this.reliability;
         this.isFirst = this.isFirst == null ? true : this.isFirst;
     }
+
+
 
     @Override
     public String toString() {
