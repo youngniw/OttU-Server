@@ -57,7 +57,6 @@ public class AuthController {
                 response.put("success", false);
                 return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
             }
-            System.out.println(kakaoResponse.getBody());        //TODO: 삭제 요망!!!!!!!!!!!!!(확인용)
 
             ObjectMapper objectMapper = new ObjectMapper();
             String email;

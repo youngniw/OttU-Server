@@ -1,5 +1,6 @@
 package com.tave8.ottu.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -31,7 +32,7 @@ public class Recruit {
     private int headcount;
 
     @Transient
-    private Long choiceNum = 0L;      //DB와 상관없는 값
+    private Long choiceNum = 0L;
 
     @Column(name = "is_completed", columnDefinition = "boolean default false")
     private Boolean isCompleted;
@@ -40,10 +41,18 @@ public class Recruit {
     @CreationTimestamp
     private LocalDateTime createdDate;
 
+    @JsonIgnore
+    @Column(name = "confirmed_date")
+    private LocalDateTime confirmedDate;
+
+    @JsonIgnore
+    @Column(name = "is_team")
+    private Boolean isTeam;
 
     @PrePersist
     public void prePersist() {
         this.isCompleted = this.isCompleted == null ? false : this.isCompleted;
+        this.isTeam = this.isTeam == null ? false : this.isTeam;
     }
 
     @Override

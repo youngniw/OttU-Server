@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -22,12 +23,37 @@ public class TeamService {
         this.userTeamRepository = userTeamRepository;
     }
 
+    public Team getTeamById(Long teamIdx) {
+        return teamRepository.getById(teamIdx);
+    }
+
     public List<Team> findAllTeamsByUser(Long userIdx) {
         List<Long> teamIdxList = userTeamRepository.findAllByUserIdx(userIdx);
 
         List<Team> teamList = null;
-        if (teamIdxList != null)
+        if (teamIdxList != null) {
             teamList = teamRepository.findAllByTeamIdx(teamIdxList);
+            teamList.forEach(team -> {
+                LocalDate today = LocalDate.now();
+                int year = today.getYear();
+                int month = today.getMonthValue();
+                if (today.compareTo(LocalDate.of(year, month, team.getPaymentDay())) <= 0)      //오늘이 더 전이거나 같은 날짜
+                    team.setPaymentDate(LocalDate.of(year, month, team.getPaymentDay()));
+                else {      //오늘이 더 후 날짜
+                    if (month == 12)
+                        team.setPaymentDate(LocalDate.of(year+1, 1, team.getPaymentDay()));
+                    else
+                        team.setPaymentDate(LocalDate.of(year, month+1, team.getPaymentDay()));
+                }
+            });
+
+            teamList.sort((o1, o2) -> {
+                if (o1.getPaymentDate() == null || o2.getPaymentDate() == null)
+                    return 0;
+
+                return o1.getPaymentDate().compareTo(o2.getPaymentDate());
+            });
+        }
 
         return teamList;
     }
@@ -36,7 +62,16 @@ public class TeamService {
         return teamRepository.save(team);
     }
 
-    public UserTeam saveUserTeam(UserTeam userTeam) {       //TODO: 안씀(모집 확정 다이얼로그에서 결제일 입력 후 나머지 회원들 추가바람!)
+    public UserTeam saveUserTeam(UserTeam userTeam) {
         return userTeamRepository.save(userTeam);
+    }
+
+    public boolean saveTeamIsDeleted(Team team) {
+        try {
+            teamRepository.save(team);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
