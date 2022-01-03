@@ -51,7 +51,7 @@ public class NoticeFirebaseMessageService {
     }
 
     private String getAccessToken() throws IOException {
-        String firebaseConfigPath = "src/main/resources/ottu_firebase_service_key.json";
+        String firebaseConfigPath = "ottu_firebase_service_key.json";
 
         GoogleCredentials googleCredentials = GoogleCredentials
                 .fromStream(new ClassPathResource(firebaseConfigPath).getInputStream())
