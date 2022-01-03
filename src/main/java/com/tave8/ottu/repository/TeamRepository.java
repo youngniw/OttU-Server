@@ -12,4 +12,7 @@ import java.util.List;
 public interface TeamRepository extends JpaRepository<Team, Long> {
     @Query("SELECT t FROM Team t WHERE t.teamIdx IN (:teamIdxList) AND t.isDeleted=false")
     List<Team> findAllByTeamIdx(@Param("teamIdxList") List<Long> teamIdxList);      //팀 번호로 팀 정보 반환
+
+    @Query("SELECT t FROM Team t WHERE t.paymentDay = :paymentDay AND t.isDeleted=false")
+    List<Team> findAllByPaymentDay(@Param("paymentDay") int paymentDay);            //결제일자로 팀 정보 반환
 }
