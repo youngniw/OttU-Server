@@ -28,10 +28,14 @@ public class RecruitController {
 
     //모집글들 받아오기
     @GetMapping("/{pid}/list")
-    public ResponseEntity getRecruitList(@PathVariable("pid") int platformIdx) {
+    public ResponseEntity getRecruitList(@PathVariable("pid") int platformIdx, @RequestParam(value = "headcount", required = false) Integer headcount) {
         HashMap<String, Object> response = new HashMap<>();
         try {
-            List<Recruit> recruitList = recruitService.findAllByPlatform(platformIdx);
+            List<Recruit> recruitList;
+            if (headcount == null)
+                recruitList = recruitService.findAllByPlatform(platformIdx);
+            else
+                recruitList = recruitService.findAllByPlatformAndHeadcount(platformIdx, headcount);
             recruitList.forEach(recruit -> recruit.setChoiceNum(recruitService.findRecruitChoiceNum(recruit.getRecruitIdx())));     //현재 수락된 참여자 수 저장
 
             response.put("success", true);
