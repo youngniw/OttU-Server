@@ -29,16 +29,14 @@ public class CommunityPostController {
             Post post = new Post();
             User user = new User();
             Platform platform = new Platform();
-
-            // 플랫폼 등록
-            platform.setPlatformIdx(postDTO.getPlatformIdx());
+            platform.setPlatformIdx(postDTO.getPlatformIdx());      // 플랫폼 등록
             post.setPlatform(platform);
-            // 작성자 등록
-            user.setUserIdx(postDTO.getUserIdx());
+
+            user.setUserIdx(postDTO.getUserIdx());      // 작성자 등록
             post.setWriter(user);
-            // 작성 글 등록
-            post.setContent(postDTO.getContent());
-            // DB에 저장
+
+            post.setContent(postDTO.getContent());      // 작성 글 등록
+
             postService.save(post);
 
             response.put("success",true);
@@ -50,37 +48,21 @@ public class CommunityPostController {
         }
     }
 
-    // 글 목록 조회(platformIdx로 글 전부 가져오기!!)
+    // 글 목록 조회
     @GetMapping("/{pid}/list")
     public ResponseEntity getPostList(@PathVariable("pid") int platformIdx){
         HashMap<String, Object> response = new HashMap<>();
         try{
             List<Post> postList = postService.findAllByPlatform(platformIdx);
+            postList.forEach(post -> post.setCommentNum(postService.findPostCommentNum(post.getPostIdx())));     //댓글 수 저장
 
-            response.put("success",true);
-            response.put("postlist",postList);
+            response.put("success", true);
+            response.put("postlist", postList);
             return new ResponseEntity(response,HttpStatus.OK);
         }
         catch (Exception e){
             response.put("success", false);
             return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    // 내가 쓴 글 조회        TODO: 주소 변경해야 함!!!!!!(__/user/{uid}/post)
-    @GetMapping("/mylist/{uid}")
-    public ResponseEntity getMyPostList(@PathVariable("uid") Long userIdx){
-        HashMap<String,Object> response = new HashMap<>();
-        try{
-            List<Post> myPostList = postService.findAllByUserIdx(userIdx);
-
-            response.put("success",true);
-            response.put("myPostList",myPostList);
-            return new ResponseEntity(response,HttpStatus.OK);
-        }
-        catch (Exception e){
-            response.put("success",false);
-            return new ResponseEntity(response,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -95,8 +77,7 @@ public class CommunityPostController {
                 post.setContent(postDTO.getContent());
                 post.setEditedDate(LocalDateTime.now());
 
-                //DB에 수정값 넣어주기
-                postService.save(post);
+                postService.save(post);     //DB에 수정값 넣어주기
 
                 response.put("success", true);
                 return new ResponseEntity(response,HttpStatus.OK);

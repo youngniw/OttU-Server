@@ -46,7 +46,6 @@ public class CommunityCommentController {
             // 글 등록
             comment.setContent(commentDTO.getComment());
 
-            // DB 등록
             commentService.save(comment);
 
             response.put("success",true);
@@ -59,7 +58,7 @@ public class CommunityCommentController {
     }
 
     // 댓글 삭제
-    @DeleteMapping("/{ccid}") // commentIdx
+    @DeleteMapping("/{ccid}")   //commentIdx
     public ResponseEntity deleteComment(@PathVariable("ccid") Long commentIdx){
         HashMap<String, Object> response = new HashMap<>();
         try {
@@ -84,7 +83,6 @@ public class CommunityCommentController {
     public ResponseEntity getCommentList(@PathVariable("cpid") Long postIdx){
         HashMap<String,Object> response = new HashMap<>();
         try {
-            // isDeleted가 false인 comment찾아옴.
             List<Comment> commentList = commentService.getCommentList(postIdx);
 
             response.put("success",true);

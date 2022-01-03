@@ -1,20 +1,23 @@
 package com.tave8.ottu.service;
 
 import com.tave8.ottu.entity.Post;
-import com.tave8.ottu.entity.Recruit;
+import com.tave8.ottu.repository.CommentRepository;
 import com.tave8.ottu.repository.PostRepository;
-import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class PostService {
+    private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
+
     @Autowired
-    private PostRepository postRepository;
+    public PostService(PostRepository postRepository, CommentRepository commentRepository) {
+        this.postRepository = postRepository;
+        this.commentRepository = commentRepository;
+    }
 
     // 작성글 저장
     public boolean save(Post post) {
@@ -40,5 +43,9 @@ public class PostService {
     // user id로 Post글 가져오기
     public List<Post> findAllByUserIdx(Long userIdx){
         return postRepository.findAllByUserIdx(userIdx);
+    }
+
+    public Long findPostCommentNum(Long postIdx) {
+        return commentRepository.countAllByPost_PostIdxAndIsDeletedFalse(postIdx);
     }
 }

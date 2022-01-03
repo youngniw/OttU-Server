@@ -23,8 +23,8 @@ public class Comment {
     @JoinColumn(name = "post_idx")
     private Post post; // 글
 
-    @OneToOne
-    @JoinColumn(name="user_idx")
+    @ManyToOne
+    @JoinColumn(name = "user_idx")
     private User writer;    //작성자 정보
 
     @Column(name = "content")

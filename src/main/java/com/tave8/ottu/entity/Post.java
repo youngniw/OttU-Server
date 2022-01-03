@@ -32,6 +32,9 @@ public class Post {
     @Column(name = "content")
     private String content; // 글 내용
 
+    @Transient
+    private Long commentNum = 0L;
+
     @Column(name = "created_date")
     @CreationTimestamp
     private LocalDateTime createdDate; // 작성 날짜, 시간
