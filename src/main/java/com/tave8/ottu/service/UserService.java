@@ -1,6 +1,8 @@
 package com.tave8.ottu.service;
 
 import com.tave8.ottu.entity.User;
+import com.tave8.ottu.entity.UserGenre;
+import com.tave8.ottu.repository.UserGenreRepository;
 import com.tave8.ottu.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,11 +13,21 @@ import java.util.Optional;
 @Service
 @Transactional
 public class UserService {
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final UserGenreRepository userGenreRepository;
 
-    public Optional<User> findUser(Long userId) {
-        return userRepository.findById(userId);
+    @Autowired
+    public UserService(UserRepository userRepository, UserGenreRepository userGenreRepository) {
+        this.userRepository = userRepository;
+        this.userGenreRepository = userGenreRepository;
+    }
+
+    public User getUserById(Long userIdx) {
+        return userRepository.getById(userIdx);
+    }
+
+    public Optional<User> findUserById(Long userIdx) {
+        return userRepository.findById(userIdx);
     }
 
     public Optional<User> findUserEmail(String email) {
@@ -32,5 +44,13 @@ public class UserService {
             return true;
         else
             return false;
+    }
+
+    public void updateUser(Long id,String nickname,String kakaotalkId){
+        userRepository.updateUser(id,nickname,kakaotalkId);
+    }
+
+    public UserGenre saveUserGenre(UserGenre userGenre) {
+        return userGenreRepository.save(userGenre);
     }
 }
