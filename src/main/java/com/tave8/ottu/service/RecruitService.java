@@ -27,7 +27,7 @@ public class RecruitService {
         return recruitRepository.findAllByPlatformIdx(platformIdx);
     }
 
-    public List<Recruit> findAllByWriter(Long writerIdx) {          //TODO: 확인요망!
+    public List<Recruit> findAllByWriter(Long writerIdx) {
         return recruitRepository.findAllByWriterIdx(writerIdx);
     }
 
@@ -39,9 +39,22 @@ public class RecruitService {
         return recruitRepository.findById(recruitIdx);
     }
 
+    public Recruit getRecruitById(Long recruitIdx) {
+        return recruitRepository.getById(recruitIdx);
+    }
+
     public boolean deleteRecruitById(Long recruitIdx) {
         try {
             recruitRepository.deleteById(recruitIdx);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean saveRecruit(Recruit recruit) {
+        try {
+            recruitRepository.save(recruit);
             return true;
         } catch (Exception e) {
             return false;
@@ -58,7 +71,11 @@ public class RecruitService {
     }
 
     public List<Waitlist> findRecruitWaitlist(Long recruitIdx) {
-        return waitlistRepository.findAllByRecruit_RecruitIdx(recruitIdx);
+        return waitlistRepository.findAllByRecruitIdxOrderByIsAcceptedDesc(recruitIdx);
+    }
+
+    public List<Waitlist> findAcceptedWaitlist(Long recruitIdx) {
+        return waitlistRepository.findAllByRecruitIdxAndIsAcceptedTrue(recruitIdx);
     }
 
     public Long findRecruitChoiceNum(Long recruitIdx) {
@@ -72,6 +89,15 @@ public class RecruitService {
     public boolean saveWaitlistIsAccepted(Waitlist waitlist) {
         try {
             waitlistRepository.save(waitlist);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean deleteNonAcceptedWaitlist(Long recruitIdx) {
+        try {
+            waitlistRepository.deleteAllByRecruitIdxAndIsAcceptedFalse(recruitIdx);
             return true;
         } catch (Exception e) {
             return false;

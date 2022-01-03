@@ -10,6 +10,6 @@ import java.util.List;
 
 @Repository
 public interface TeamRepository extends JpaRepository<Team, Long> {
-    @Query("SELECT t FROM Team t WHERE t.teamIdx IN (:teamIdxList) AND t.isDeleted=false")      //TODO: false 확인 요망!!!!!!
+    @Query("SELECT t FROM Team t WHERE t.teamIdx IN (:teamIdxList) AND t.isDeleted=false")
     List<Team> findAllByTeamIdx(@Param("teamIdxList") List<Long> teamIdxList);      //팀 번호로 팀 정보 반환
 }

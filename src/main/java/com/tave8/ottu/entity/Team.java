@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -32,11 +33,14 @@ public class Team {
     private int headcount;
 
     @JsonIgnore
-    @Column(name = "first_payment_date")
-    private LocalDateTime firstPaymentdate;
+    @Column(name = "created_date")
+    private LocalDateTime createdDate;
 
     @Column(name = "payment_day")
     private int paymentDay;
+
+    @Transient
+    private LocalDate paymentDate;
 
     @JsonIgnore
     @Column(name = "is_deleted", columnDefinition = "boolean default false")
@@ -54,7 +58,7 @@ public class Team {
                 ", leader=" + leader +
                 ", platform=" + platform +
                 ", headcount=" + headcount +
-                ", firstPaymentdate=" + firstPaymentdate +
+                ", createdDate=" + createdDate +
                 ", paymentDay=" + paymentDay +
                 ", isDeleted=" + isDeleted +
                 '}';
