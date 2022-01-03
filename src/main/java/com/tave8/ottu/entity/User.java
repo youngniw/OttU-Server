@@ -53,6 +53,13 @@ public class User {
         this.isFirst = this.isFirst == null ? true : this.isFirst;
     }
 
+    public boolean isNoticeTokenNull() {
+        if (noticeToken == null)
+            return true;
+        else
+            return false;
+    }
+
     @Override
     public String toString() {
         return "User{" +

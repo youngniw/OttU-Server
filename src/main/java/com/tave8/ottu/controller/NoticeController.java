@@ -46,7 +46,6 @@ public class NoticeController {
                 notice.setContent(content);
                 noticeService.save(notice);
 
-                //TODO: 확인 요망!!
                 if (user.getNoticeToken() != null) {
                     try {
                         noticeFirebaseMessageService.sendMessageTo(user.getNoticeToken(), "OTT 서비스 결제일 알림", content);

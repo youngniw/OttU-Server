@@ -40,14 +40,20 @@ public class UserService {
 
     //닉네임 유효 여부(false->이미 존재함  /  true->사용 가능)
     public boolean isExistedNickname(String nickname){
-        if (userRepository.findUserByNickname(nickname).isPresent())
-            return true;
-        else
-            return false;
+        return userRepository.findUserByNickname(nickname).isPresent();
     }
 
     public void updateUser(Long id,String nickname,String kakaotalkId){
         userRepository.updateUser(id,nickname,kakaotalkId);
+    }
+
+    public boolean saveUser(User user) {
+        try {
+            userRepository.save(user);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public UserGenre saveUserGenre(UserGenre userGenre) {
