@@ -33,4 +33,15 @@ public class UserService {
         else
             return false;
     }
+
+    public boolean isExistedKakaoId(String kakaoId) {
+        if (userRepository.findUserByKakaotalkId(kakaoId).isPresent()) {
+            return true;
+        } else
+            return false;
+    }
+
+    public void updateUser(Long id,String nickname,String kakaotalkId){
+        userRepository.updateUser(id,nickname,kakaotalkId);
+    }
 }
