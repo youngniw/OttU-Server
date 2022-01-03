@@ -1,6 +1,7 @@
 package com.tave8.ottu.service;
 
 import com.tave8.ottu.entity.Team;
+import com.tave8.ottu.entity.User;
 import com.tave8.ottu.entity.UserTeam;
 import com.tave8.ottu.repository.TeamRepository;
 import com.tave8.ottu.repository.UserTeamRepository;
@@ -56,6 +57,14 @@ public class TeamService {
         }
 
         return teamList;
+    }
+
+    public List<Team> findAllByPaymentDay(int paymentDay) {
+        return teamRepository.findAllByPaymentDay(paymentDay);
+    }
+
+    public List<User> findAllUserByTeamIdx(Long teamIdx) {
+        return userTeamRepository.findAllUserByTeamIdx(teamIdx);
     }
 
     public Team saveTeam(Team team) {

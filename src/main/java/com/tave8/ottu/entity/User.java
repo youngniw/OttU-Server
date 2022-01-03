@@ -38,6 +38,10 @@ public class User {
     @Column(name = "is_first", columnDefinition = "boolean default true")
     private Boolean isFirst;
 
+    @JsonIgnore
+    @Column(name = "notice_token")
+    private String noticeToken;
+
     @ManyToMany
     @JoinTable(name = "user_genre", joinColumns = @JoinColumn(name = "user_idx"), inverseJoinColumns = @JoinColumn(name = "genre_idx"))
     private List<Genre> genres = new ArrayList<>();
@@ -58,6 +62,7 @@ public class User {
                 ", nickname='" + nickname + '\'' +
                 ", reliability=" + reliability +
                 ", isFirst=" + isFirst +
+                ", noticeToken='" + noticeToken + '\'' +
                 ", genres=" + genres +
                 '}';
     }

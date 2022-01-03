@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 
 @RestController
-@RequestMapping
 public class OttController {
     private final TeamService teamService;
     private final RecruitService recruitService;
@@ -184,6 +183,7 @@ public class OttController {
     //팀 삭제
     @DeleteMapping("/team/{tid}")
     public ResponseEntity deleteRecruit(@PathVariable("tid") Long teamIdx) {
+        //TODO: 팀원 평가가 이루어지게 해야 함!
         HashMap<String, Object> response = new HashMap<>();
         try {
             Team team = teamService.getTeamById(teamIdx);
