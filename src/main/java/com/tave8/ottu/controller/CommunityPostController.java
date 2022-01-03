@@ -18,17 +18,13 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/community/post")
 public class CommunityPostController {
-
     @Autowired
-    private PostRepository postRepository;
     private PostService postService;
 
     // 글 작성
-    @PostMapping("/write")
-    public ResponseEntity postWrite(@RequestBody PostDTO postDTO){
-
+    @PostMapping("/upload")
+    public ResponseEntity postUpload(@RequestBody PostDTO postDTO){
         HashMap<String,Object> response = new HashMap<>();
-
         try {
             Post post = new Post();
             User user = new User();
@@ -37,23 +33,11 @@ public class CommunityPostController {
             // 플랫폼 등록
             platform.setPlatformIdx(postDTO.getPlatformIdx());
             post.setPlatform(platform);
-
             // 작성자 등록
             user.setUserIdx(postDTO.getUserIdx());
             post.setWriter(user);
-
             // 작성 글 등록
-            if(postDTO.getContent() != null){
-                post.setContent(postDTO.getContent());
-            }
-            else{
-                new IllegalStateException("내용이 비어있습니다");
-                response.put("success",false);
-                return new ResponseEntity(response,HttpStatus.BAD_REQUEST);
-            }
-            // 현재 시간 등록
-            LocalDateTime currenttime = LocalDateTime.now();
-            post.setCreatedDate(currenttime);
+            post.setContent(postDTO.getContent());
             // DB에 저장
             postService.save(post);
 
@@ -67,11 +51,9 @@ public class CommunityPostController {
     }
 
     // 글 목록 조회(platformIdx로 글 전부 가져오기!!)
-    @GetMapping("/list/{pid}")
+    @GetMapping("/{pid}/list")
     public ResponseEntity getPostList(@PathVariable("pid") int platformIdx){
-
         HashMap<String, Object> response = new HashMap<>();
-
         try{
             List<Post> postList = postService.findAllByPlatform(platformIdx);
 
@@ -85,12 +67,10 @@ public class CommunityPostController {
         }
     }
 
-    // 내가 쓴 글 조회
+    // 내가 쓴 글 조회        TODO: 주소 변경해야 함!!!!!!(__/user/{uid}/post)
     @GetMapping("/mylist/{uid}")
     public ResponseEntity getMyPostList(@PathVariable("uid") Long userIdx){
-
         HashMap<String,Object> response = new HashMap<>();
-
         try{
             List<Post> myPostList = postService.findAllByUserIdx(userIdx);
 
@@ -103,58 +83,53 @@ public class CommunityPostController {
             return new ResponseEntity(response,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
     // 글 수정
-    @PostMapping("/edit")
-    public ResponseEntity editPost(@RequestBody PostDTO postDTO){
-
+    @PatchMapping("/{cpid}")
+    public ResponseEntity editPost(@PathVariable("cpid") Long postIdx, @RequestBody PostDTO postDTO){
         HashMap<String,Object> response = new HashMap<>();
-
-        try{
-            // postIdx정보 가져오기
-            Long postIdx = postDTO.getUserIdx();
-
-            //수정 글 가져오기
-            String editContent = postDTO.getContent();
-
-            //현재 날짜
-            LocalDateTime currentTime = LocalDateTime.now();
-
+        try {
             //Post 가져오기
-            Post post = postRepository.findByPostIdx(postIdx);
-            post.setContent(editContent);
-            post.setEditedDate(currentTime);
+            Post post = postService.getById(postIdx);
+            if (post.getWriter().getUserIdx().equals(postDTO.getUserIdx())) {
+                post.setContent(postDTO.getContent());
+                post.setEditedDate(LocalDateTime.now());
 
-            //DB에 수정값 넣어주기
-            postRepository.updatePost(editContent,postIdx,currentTime);
+                //DB에 수정값 넣어주기
+                postService.save(post);
 
-            response.put("success",true);
-            response.put("post",post);
-            return new ResponseEntity(response,HttpStatus.OK);
+                response.put("success", true);
+                return new ResponseEntity(response,HttpStatus.OK);
+            }
+            else {
+                response.put("success", false);
+                return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+            }
         }
         catch (Exception e){
-            response.put("success",false);
+            response.put("success", false);
             return new ResponseEntity(response,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     // 글 삭제
-    @GetMapping("/delete/{pid}")
-    public ResponseEntity deletePost(@PathVariable("pid")Long postIdx){
-
+    @DeleteMapping("/{cpid}")
+    public ResponseEntity deletePost(@PathVariable("cpid") Long postIdx){
         HashMap<String, Object> response = new HashMap<>();
-
         try{
-            Post post = postService.findPostByPostIdx(postIdx);
-
-            post.setDeleted(true);
-            postService.deletePost(true,postIdx);
-
-            response.put("success",true);
-            response.put("isDeleted",true);
-            return new ResponseEntity(response,HttpStatus.OK);
+            Post post = postService.getById(postIdx);
+            post.setIsDeleted(true);
+            if (postService.save(post)) {
+                response.put("success", true);
+                return new ResponseEntity(response,HttpStatus.OK);
+            }
+            else {
+                response.put("success", false);
+                return new ResponseEntity(response,HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         }
         catch (Exception e){
-            response.put("success",false);
+            response.put("success", false);
             return new ResponseEntity(response,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

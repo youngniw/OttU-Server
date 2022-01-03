@@ -37,5 +37,8 @@ public class Comment {
     @Column(name = "is_deleted",columnDefinition = "boolean default false")
     private Boolean isDeleted;
 
-
+    @PrePersist
+    public void prePersist() {
+        this.isDeleted = this.isDeleted == null ? false : this.isDeleted;
+    }
 }

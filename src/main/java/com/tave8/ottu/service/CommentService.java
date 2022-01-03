@@ -10,21 +10,36 @@ import java.util.List;
 
 @Service
 public class CommentService {
-
     @Autowired
     private CommentRepository commentRepository;
 
     // 댓글 가져오기
-    public List<Comment> getCommentList(Long postIdx){
+    public List<Comment> getCommentList(Long postIdx) {
         List<Comment> commentList = commentRepository.findAllByPostIdx(postIdx);
-        List<Comment> newCommentList = new ArrayList<>();
 
-        for(Comment comment : commentList){
-            if(comment.getIsDeleted()==false){
-                newCommentList.add(comment);
-            }
+        return commentList;
+    }
+
+    public Comment getCommentById(Long commentIdx) {
+        return commentRepository.getById(commentIdx);
+    }
+
+    // 작성글 저장
+    public boolean save(Comment comment) {
+        try {
+            commentRepository.save(comment);
+            return true;
+        } catch (Exception e) {
+            return false;
         }
+    }
 
-        return newCommentList;
+    public boolean saveCommentIsDeleted(Comment comment) {
+        try {
+            commentRepository.save(comment);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

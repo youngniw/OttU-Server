@@ -39,6 +39,11 @@ public class Post {
     @Column(name = "edited_date")
     private LocalDateTime editedDate; // 수정 날짜, 시간
 
-    @Column(name = "is_deleted",columnDefinition = "boolean default false")
-    private boolean isDeleted; // 삭제 여부
+    @Column(name = "is_deleted", columnDefinition = "boolean default false")
+    private Boolean isDeleted; // 삭제 여부
+
+    @PrePersist
+    public void prePersist() {
+        this.isDeleted = this.isDeleted == null ? false : this.isDeleted;
+    }
 }

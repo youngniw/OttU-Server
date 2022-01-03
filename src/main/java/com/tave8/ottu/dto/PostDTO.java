@@ -8,9 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PostDTO {
-    private Long postIdx; // 수정에만 사용
     private Long userIdx;
     private int platformIdx;
     private String content;
-
 }

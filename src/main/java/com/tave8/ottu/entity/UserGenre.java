@@ -11,16 +11,15 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Getter
 @Setter
-
-public class User_Genre {
+public class UserGenre {
     @Id
     @Column(name = "user_idx")
     private Long userIdx;
 
     @Column(name="genre_idx")
-    private Long genreIdx;
+    private int genreIdx;
 
-    public User_Genre(Long userIdx, Long genreIdx) {
+    public UserGenre(Long userIdx, int genreIdx) {
         this.userIdx = userIdx;
         this.genreIdx = genreIdx;
     }

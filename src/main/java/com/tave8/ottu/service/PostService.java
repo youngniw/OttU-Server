@@ -13,13 +13,17 @@ import java.util.List;
 
 @Service
 public class PostService {
-
     @Autowired
     private PostRepository postRepository;
 
     // 작성글 저장
-    public void save(Post post){
-        postRepository.save(post);
+    public boolean save(Post post) {
+        try {
+            postRepository.save(post);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     // 플랫폼id로 Post글 가져오기
@@ -28,25 +32,13 @@ public class PostService {
         return postList;
     }
 
+    // post idx로 Post 가져오기
+    public Post getById(Long postIdx) {
+        return postRepository.getById(postIdx);
+    }
+
     // user id로 Post글 가져오기
     public List<Post> findAllByUserIdx(Long userIdx){
         return postRepository.findAllByUserIdx(userIdx);
     }
-
-    // 수정하기
-    public void update(String content, Long postId, LocalDateTime dt){
-        postRepository.updatePost(content,postId,dt);
-    }
-
-    // post idx로 Post 가져오기
-    public Post findPostByPostIdx(Long postIdx){
-        Post post = postRepository.findByPostIdx(postIdx);
-        return post;
-    }
-
-    // 삭제하기
-    public void deletePost(Boolean isDeleted,Long postIdx){
-        postRepository.deletePost(isDeleted,postIdx);
-    }
-
 }
