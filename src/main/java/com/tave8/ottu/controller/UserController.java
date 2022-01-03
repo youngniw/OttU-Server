@@ -34,37 +34,21 @@ public class UserController {
             // userDTO에서 받은 userIdx로 user찾기
             User user = userService.findUser(userDTO.getUserIdx()).orElse(null);
 
-            // 받은 nickname과 kakaoId중복검사 실시
-            // false -> 사용가능
-            if(userService.isExistedNickname(userDTO.getNickname())==false){
-                // 받은 kakaotalkId 중복검사 실시
-                if(userService.isExistedKakaoId(userDTO.getKakaotalkId())==false){
-                    user.setNickname(userDTO.getNickname());
-                    user.setKakaotalkId(userDTO.getKakaotalkId());
-                    userService.updateUser(userDTO.getUserIdx(),userDTO.getNickname(),userDTO.getKakaotalkId());
+            user.setNickname(userDTO.getNickname());
+            user.setKakaotalkId(userDTO.getKakaotalkId());
+            userService.updateUser(userDTO.getUserIdx(),userDTO.getNickname(),userDTO.getKakaotalkId());
 
-                    // 장르 업데이트
-                    user.setGenres(userDTO.getGenres());
+            // 장르 업데이트
+            user.setGenres(userDTO.getGenres());
 
-                    for(Genre genre:userDTO.getGenres()){
-                        User_Genre user_genre = new User_Genre(userDTO.getUserIdx(),genre.getGenreIdx());
-                        user_genreReposiotry.save(user_genre);
-                    }
-
-                    response.put("success",true);
-                    response.put("User",user);
-                    return new ResponseEntity(response,HttpStatus.OK);
-
-                }
-                else{
-                    response.put("success",false);
-                    return new ResponseEntity(response,HttpStatus.BAD_REQUEST);
-                }
+            for(Genre genre:userDTO.getGenres()){
+                User_Genre user_genre = new User_Genre(userDTO.getUserIdx(),genre.getGenreIdx());
+                user_genreReposiotry.save(user_genre);
             }
-            else{
-                response.put("success",false);
-                return new ResponseEntity(response,HttpStatus.BAD_REQUEST);
-            }
+
+            response.put("success",true);
+            response.put("User",user);
+            return new ResponseEntity(response,HttpStatus.OK);
 
         }
         catch (Exception e){

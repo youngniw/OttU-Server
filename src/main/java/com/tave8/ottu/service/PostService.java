@@ -25,13 +25,7 @@ public class PostService {
     // 플랫폼id로 Post글 가져오기
     public List<Post> findAllByPlatform(int platformIdx) {
         List<Post> postList = postRepository.findAllByPlatformIdx(platformIdx);
-        List<Post> newpostList = new ArrayList<>();
-        for(Post post : postList){
-            if (post.isDeleted()==false){
-                newpostList.add(post);
-            }
-        }
-        return newpostList;
+        return postList;
     }
 
     // user id로 Post글 가져오기

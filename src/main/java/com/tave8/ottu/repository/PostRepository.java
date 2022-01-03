@@ -13,7 +13,8 @@ import java.util.List;
 
 @Repository
 public interface PostRepository extends JpaRepository <Post,Long> {
-    @Query(value = "SELECT p FROM Communitypost p WHERE p.platform.platformIdx = :platformIdx ORDER BY p.createdDate DESC",nativeQuery = true)
+    @Query(value = "SELECT p FROM Communitypost p WHERE p.platform.platformIdx = :platformIdx AND p.isDeleted = false ORDER BY p.createdDate DESC"
+,nativeQuery = true)
     List<Post> findAllByPlatformIdx(@Param("platformIdx") int platformIdx);
 
     @Query(value = "SELECT p FROM Communitypost p WHERE p.user.userIdx = :userIdx ORDER BY p.createdDate DESC",nativeQuery = true)

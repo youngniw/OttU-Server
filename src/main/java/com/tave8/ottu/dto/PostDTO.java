@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class PostDTO {
     private Long postIdx; // 수정에만 사용
     private Long userIdx;
-    private Long platformIdx;
+    private int platformIdx;
     private String content;
 
 }
