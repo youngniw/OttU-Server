@@ -2,6 +2,7 @@ package com.tave8.ottu.controller;
 
 import com.google.api.Http;
 import com.tave8.ottu.dto.UserDTO;
+import com.tave8.ottu.entity.Genre;
 import com.tave8.ottu.entity.User;
 import com.tave8.ottu.entity.UserGenre;
 import com.tave8.ottu.service.UserService;
@@ -10,9 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping(value = "/user")
@@ -31,23 +30,31 @@ public class UserController {
             // userDTO에서 받은 userIdx로 user찾기
             User user = userService.findUserById(userIdx).orElse(null);
 
-            if(userDTO.getUser().getKakaotalkId()!=null){
-                user.setKakaotalkId(userDTO.getUser().getKakaotalkId());
+            if(userDTO.getKakaotalkId()!=null){
+                user.setKakaotalkId(userDTO.getKakaotalkId());
             }
             else{
                 response.put("success",false);
                 return new ResponseEntity(response,HttpStatus.BAD_REQUEST);
             }
 
-            if(userDTO.getUser().getNickname()!=null){
-                user.setNickname(userDTO.getUser().getNickname());
+            if(userDTO.getNickname()!=null){
+                user.setNickname(userDTO.getNickname());
             }
             else{
                 response.put("success",false);
                 return new ResponseEntity(response,HttpStatus.BAD_REQUEST);
             }
 
-            user.setGenres(userDTO.getUser().getGenres());
+
+            List<Integer> genreList = userDTO.getGenres();
+            List<Genre> genres = new ArrayList<>();
+            for(int genre:genreList){
+                Genre your_genre = userService.findGenreByGenreIDx(genre);
+                genres.add(your_genre);
+            }
+
+            user.setGenres(genres);
             userService.updateUser(user);
 
             response.put("user",user);
@@ -117,8 +124,8 @@ public class UserController {
         }
     }
 
-    @GetMapping("/delete/{userIdx}")
-    public ResponseEntity deleteUser(@PathVariable("userIdx")Long userIdx){
+    @GetMapping("/delete/{uid}")
+    public ResponseEntity deleteUser(@PathVariable("uid")Long userIdx){
         HashMap<String,Object> response = new HashMap<>();
 
         try{

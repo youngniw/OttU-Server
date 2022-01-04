@@ -1,25 +1,29 @@
 package com.tave8.ottu.service;
 
+import com.tave8.ottu.entity.Genre;
 import com.tave8.ottu.entity.User;
 import com.tave8.ottu.entity.UserGenre;
+import com.tave8.ottu.repository.GenreRepository;
 import com.tave8.ottu.repository.UserGenreRepository;
 import com.tave8.ottu.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @Transactional
 public class UserService {
     private final UserRepository userRepository;
-    private final UserGenreRepository userGenreRepository;
+    private final GenreRepository genreRepository;
+
 
     @Autowired
-    public UserService(UserRepository userRepository, UserGenreRepository userGenreRepository) {
+    public UserService(UserRepository userRepository, GenreRepository genreRepository) {
         this.userRepository = userRepository;
-        this.userGenreRepository = userGenreRepository;
+        this.genreRepository = genreRepository;
     }
 
     public User getUserById(Long userIdx) {
@@ -60,7 +64,8 @@ public class UserService {
         userRepository.delete(user);
     }
 
-    public UserGenre saveUserGenre(UserGenre userGenre) {
-        return userGenreRepository.save(userGenre);
+    public Genre findGenreByGenreIDx(int genreIdx){
+        return genreRepository.findGenreByGenreIdx(genreIdx).orElse(null);
     }
+
 }
