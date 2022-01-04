@@ -1,9 +1,7 @@
 package com.tave8.ottu.controller;
 
-import com.google.api.Http;
 import com.tave8.ottu.dto.UserDTO;
 import com.tave8.ottu.entity.User;
-import com.tave8.ottu.entity.UserGenre;
 import com.tave8.ottu.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -117,8 +115,8 @@ public class UserController {
         }
     }
 
-    @GetMapping("/delete/{userIdx}")
-    public ResponseEntity deleteUser(@PathVariable("userIdx")Long userIdx){
+    @DeleteMapping("/{uid}")
+    public ResponseEntity deleteUser(@PathVariable("uid") Long userIdx){
         HashMap<String,Object> response = new HashMap<>();
 
         try{

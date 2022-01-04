@@ -1,5 +1,6 @@
 package com.tave8.ottu.controller;
 import com.tave8.ottu.dto.PostDTO;
+import com.tave8.ottu.dto.SimplePostDTO;
 import com.tave8.ottu.entity.Comment;
 import com.tave8.ottu.entity.Platform;
 import com.tave8.ottu.entity.Post;
@@ -30,6 +31,62 @@ public class CommunityPostController {
         this.commentService = commentService;
     }
 
+    @GetMapping("/current")
+    public ResponseEntity getCurrentPostList() {
+        HashMap<String, Object> response = new HashMap<>();
+        try{
+            List<SimplePostDTO> currentPostList = postService.findCurrentPlatformPost();
+
+            response.put("success", true);
+            response.put("postlist", currentPostList);
+            return new ResponseEntity(response,HttpStatus.OK);
+        }
+        catch (Exception e){
+            response.put("success", false);
+            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/{pid}/list")
+    public ResponseEntity getPostList(@PathVariable("pid") int platformIdx){
+        HashMap<String, Object> response = new HashMap<>();
+        try{
+            List<Post> postList = postService.findAllByPlatform(platformIdx);
+            postList.forEach(post -> post.setCommentNum(postService.findPostCommentNum(post.getPostIdx())));     //댓글 수 저장
+
+            response.put("success", true);
+            response.put("postlist", postList);
+            return new ResponseEntity(response,HttpStatus.OK);
+        }
+        catch (Exception e){
+            response.put("success", false);
+            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/{cpid}")
+    public ResponseEntity getPostAndCommentList(@PathVariable("cpid") Long postIdx) {
+        HashMap<String, Object> response = new HashMap<>();
+        try{
+            List<Comment> commentList = new ArrayList<>();
+
+            Optional<Post> post = postService.findById(postIdx);
+            if (post.isPresent()) {
+                commentList = commentService.getCommentList(postIdx);
+                post.get().setCommentNum(Long.valueOf(commentList.size()));     //댓글 수 저장
+            }
+
+            response.put("success", true);
+            response.put("post", post);
+            response.put("commentlist", commentList);
+            return new ResponseEntity(response, HttpStatus.OK);
+        }
+        catch (Exception e){
+            response.put("success", false);
+            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     // 글 작성
     @PostMapping("/upload")
     public ResponseEntity postUpload(@RequestBody PostDTO postDTO){
@@ -52,48 +109,6 @@ public class CommunityPostController {
             return new ResponseEntity(response, HttpStatus.CREATED);
         }
         catch (Exception e) {
-            response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    // 글 목록 조회
-    @GetMapping("/{pid}/list")
-    public ResponseEntity getPostList(@PathVariable("pid") int platformIdx){
-        HashMap<String, Object> response = new HashMap<>();
-        try{
-            List<Post> postList = postService.findAllByPlatform(platformIdx);
-            postList.forEach(post -> post.setCommentNum(postService.findPostCommentNum(post.getPostIdx())));     //댓글 수 저장
-
-            response.put("success", true);
-            response.put("postlist", postList);
-            return new ResponseEntity(response,HttpStatus.OK);
-        }
-        catch (Exception e){
-            response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-
-    @GetMapping("/{cpid}")
-    public ResponseEntity getPostAndCommentList(@PathVariable("cpid") Long postIdx) {
-        HashMap<String, Object> response = new HashMap<>();
-        try{
-            List<Comment> commentList = new ArrayList<>();
-
-            Optional<Post> post = postService.findById(postIdx);
-            if (post.isPresent()) {
-                commentList = commentService.getCommentList(postIdx);
-                post.get().setCommentNum(Long.valueOf(commentList.size()));     //댓글 수 저장
-            }
-
-            response.put("success", true);
-            response.put("post", post);
-            response.put("commentlist", commentList);
-            return new ResponseEntity(response, HttpStatus.OK);
-        }
-        catch (Exception e){
             response.put("success", false);
             return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
