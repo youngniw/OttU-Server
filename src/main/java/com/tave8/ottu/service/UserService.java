@@ -38,7 +38,7 @@ public class UserService {
         return userRepository.saveAndFlush(user);
     }
 
-    //닉네임 유효 여부(false->이미 존재함  /  true->사용 가능)
+    //닉네임 유효 여부(true->이미 존재함  /  false->사용 가능)
     public boolean isExistedNickname(String nickname){
         return userRepository.findUserByNickname(nickname).isPresent();
     }
