@@ -19,4 +19,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying(clearAutomatically = true)
     @Query(value = "UPDATE User u SET u.nickname = ?2,u.kakaotalk_id = ?3 WHERE u.user_idx = ?1",nativeQuery = true)
     int updateUser(Long id,String nickname, String kakaotalkId);
+
 }
