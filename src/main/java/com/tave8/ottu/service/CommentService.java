@@ -29,17 +29,13 @@ public class CommentService {
         try {
             commentRepository.save(comment);
             return true;
-        } catch (Exception e) {
-            return false;
-        }
+        } catch (Exception e) { return false; }
     }
 
     public boolean saveCommentIsDeleted(Comment comment) {
         try {
             commentRepository.save(comment);
             return true;
-        } catch (Exception e) {
-            return false;
-        }
+        } catch (Exception e) { return false; }
     }
 }

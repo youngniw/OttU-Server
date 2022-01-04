@@ -1,5 +1,6 @@
 package com.tave8.ottu.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -7,8 +8,6 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "communitypost")
@@ -32,13 +31,18 @@ public class Post {
     @Column(name = "content")
     private String content; // 글 내용
 
+    @Transient
+    private Long commentNum = 0L;
+
     @Column(name = "created_date")
     @CreationTimestamp
     private LocalDateTime createdDate; // 작성 날짜, 시간
 
+    @JsonIgnore
     @Column(name = "edited_date")
     private LocalDateTime editedDate; // 수정 날짜, 시간
 
+    @JsonIgnore
     @Column(name = "is_deleted", columnDefinition = "boolean default false")
     private Boolean isDeleted; // 삭제 여부
 
