@@ -13,21 +13,9 @@ import java.util.List;
 
 @Repository
 public interface PostRepository extends JpaRepository <Post,Long> {
-    @Query(value = "SELECT p FROM Communitypost p WHERE p.platform.platformIdx = :platformIdx AND p.isDeleted = false ORDER BY p.createdDate DESC"
-,nativeQuery = true)
+    @Query("SELECT p FROM Post p WHERE p.platform.platformIdx = :platformIdx AND p.isDeleted = false ORDER BY p.createdDate DESC")
     List<Post> findAllByPlatformIdx(@Param("platformIdx") int platformIdx);
 
-    @Query(value = "SELECT p FROM Communitypost p WHERE p.user.userIdx = :userIdx ORDER BY p.createdDate DESC",nativeQuery = true)
+    @Query("SELECT p FROM Post p WHERE p.writer.userIdx = :userIdx ORDER BY p.createdDate DESC")
     List<Post> findAllByUserIdx(@Param("userIdx") Long userIdx);
-
-    @Query(value = "SELECT p FROM Communitypost p WHERE p.postIdx = :postIdx",nativeQuery = true)
-    Post findByPostIdx(@Param("postIdx") Long postIdx);
-
-    @Modifying(clearAutomatically = true)
-    @Query(value = "UPDATE Communitypost p SET p.content = ?1,p.editedDate = ?3 WHERE p.postIdx = ?2",nativeQuery = true)
-    int updatePost(String content, Long id, LocalDateTime dt);
-
-    @Modifying(clearAutomatically = true)
-    @Query(value = "UPDATE Communitypost p SET p.isDeleted = ?1 WHERE p.postIdx = ?2",nativeQuery = true)
-    int deletePost(Boolean isDeleted,Long id);
 }
