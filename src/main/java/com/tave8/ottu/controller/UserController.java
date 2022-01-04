@@ -1,5 +1,6 @@
 package com.tave8.ottu.controller;
 
+import com.google.api.Http;
 import com.tave8.ottu.dto.UserDTO;
 import com.tave8.ottu.entity.User;
 import com.tave8.ottu.entity.UserGenre;
@@ -28,18 +29,28 @@ public class UserController {
         HashMap<String,Object> response = new HashMap<>();
         try {
             // userDTO에서 받은 userIdx로 user찾기
-            User user = userService.getUserById(userIdx);
+            User user = userService.findUserById(userIdx).orElse(null);
 
-            user.setNickname(userDTO.getNickname());
-            user.setKakaotalkId(userDTO.getKakaotalkId());
-            userService.updateUser(userIdx, userDTO.getNickname(), userDTO.getKakaotalkId());
-
-            // 장르 업데이트
-            for (Integer genreIdx : userDTO.getGenres()){
-                UserGenre userGenre = new UserGenre(userIdx, genreIdx);
-                userService.saveUserGenre(userGenre);
+            if(userDTO.getUser().getKakaotalkId()!=null){
+                user.setKakaotalkId(userDTO.getUser().getKakaotalkId());
+            }
+            else{
+                response.put("success",false);
+                return new ResponseEntity(response,HttpStatus.BAD_REQUEST);
             }
 
+            if(userDTO.getUser().getNickname()!=null){
+                user.setNickname(userDTO.getUser().getNickname());
+            }
+            else{
+                response.put("success",false);
+                return new ResponseEntity(response,HttpStatus.BAD_REQUEST);
+            }
+
+            user.setGenres(userDTO.getUser().getGenres());
+            userService.updateUser(user);
+
+            response.put("user",user);
             response.put("success",true);
             return new ResponseEntity(response,HttpStatus.OK);
         }
@@ -103,6 +114,27 @@ public class UserController {
         } catch (Exception e) {
             response.put("success", false);
             return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/delete/{userIdx}")
+    public ResponseEntity deleteUser(@PathVariable("userIdx")Long userIdx){
+        HashMap<String,Object> response = new HashMap<>();
+
+        try{
+            User user = userService.findUserById(userIdx).orElse(null);
+            if(user == null){
+                response.put("success",false);
+                return new ResponseEntity(response,HttpStatus.BAD_REQUEST);
+            }
+            userService.deleteUser(user);
+
+            response.put("success",true);
+            return new ResponseEntity(response,HttpStatus.OK);
+        }
+        catch (Exception e){
+            response.put("success",false);
+            return new ResponseEntity(response,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

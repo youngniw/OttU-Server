@@ -1,6 +1,7 @@
 package com.tave8.ottu.dto;
 
 import com.tave8.ottu.entity.Genre;
+import com.tave8.ottu.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +13,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDTO {
-    private String kakaotalkId;
-    private String nickname;
-    private List<Integer> genres;
+    public String success;
+    public User user;
+    @Data
+    public class User{
+        public String kakaotalkId;
+        public String nickname;
+        public List<Genre> genres;
+    }
 }
