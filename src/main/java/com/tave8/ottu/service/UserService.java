@@ -43,8 +43,8 @@ public class UserService {
         return userRepository.findUserByNickname(nickname).isPresent();
     }
 
-    public void updateUser(Long id,String nickname,String kakaotalkId){
-        userRepository.updateUser(id,nickname,kakaotalkId);
+    public void updateUser(User user){
+        userRepository.save(user);
     }
 
     public boolean saveUser(User user) {
@@ -54,6 +54,10 @@ public class UserService {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public void deleteUser(User user){
+        userRepository.delete(user);
     }
 
     public UserGenre saveUserGenre(UserGenre userGenre) {
