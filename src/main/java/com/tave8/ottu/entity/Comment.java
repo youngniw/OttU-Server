@@ -1,5 +1,6 @@
 package com.tave8.ottu.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,6 +20,7 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long commentIdx;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "post_idx")
     private Post post; // 글
@@ -34,6 +36,7 @@ public class Comment {
     @CreationTimestamp
     private LocalDateTime createdDate;
 
+    @JsonIgnore
     @Column(name = "is_deleted",columnDefinition = "boolean default false")
     private Boolean isDeleted;
 

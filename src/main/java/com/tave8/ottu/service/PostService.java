@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PostService {
@@ -33,6 +34,10 @@ public class PostService {
     public List<Post> findAllByPlatform(int platformIdx) {
         List<Post> postList = postRepository.findAllByPlatformIdx(platformIdx);
         return postList;
+    }
+
+    public Optional<Post> findById(Long postIdx) {
+        return postRepository.findById(postIdx);
     }
 
     // post idx로 Post 가져오기

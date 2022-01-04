@@ -1,9 +1,10 @@
 package com.tave8.ottu.controller;
 import com.tave8.ottu.dto.PostDTO;
+import com.tave8.ottu.entity.Comment;
 import com.tave8.ottu.entity.Platform;
 import com.tave8.ottu.entity.Post;
 import com.tave8.ottu.entity.User;
-import com.tave8.ottu.repository.PostRepository;
+import com.tave8.ottu.service.CommentService;
 import com.tave8.ottu.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,15 +12,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/community/post")
 public class CommunityPostController {
+    private final PostService postService;
+    private final CommentService commentService;
+
     @Autowired
-    private PostService postService;
+    public CommunityPostController(PostService postService, CommentService commentService) {
+        this.postService = postService;
+        this.commentService = commentService;
+    }
 
     // 글 작성
     @PostMapping("/upload")
@@ -59,6 +68,30 @@ public class CommunityPostController {
             response.put("success", true);
             response.put("postlist", postList);
             return new ResponseEntity(response,HttpStatus.OK);
+        }
+        catch (Exception e){
+            response.put("success", false);
+            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @GetMapping("/{cpid}")
+    public ResponseEntity getPostAndCommentList(@PathVariable("cpid") Long postIdx) {
+        HashMap<String, Object> response = new HashMap<>();
+        try{
+            List<Comment> commentList = new ArrayList<>();
+
+            Optional<Post> post = postService.findById(postIdx);
+            if (post.isPresent()) {
+                commentList = commentService.getCommentList(postIdx);
+                post.get().setCommentNum(Long.valueOf(commentList.size()));     //댓글 수 저장
+            }
+
+            response.put("success", true);
+            response.put("post", post);
+            response.put("commentlist", commentList);
+            return new ResponseEntity(response, HttpStatus.OK);
         }
         catch (Exception e){
             response.put("success", false);

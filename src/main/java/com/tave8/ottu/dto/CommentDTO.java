@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CommentDTO {
-    private String comment;     // 댓글 내용
-    private Long PostIdx; // 글 번호
-    private Long UserIdx; // 작성자
+    private Long postIdx;       // 글 번호
+    private Long userIdx;       // 작성자
+    private String content;     // 댓글 내용
 }
