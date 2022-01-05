@@ -1,8 +1,6 @@
 package com.tave8.ottu.controller;
 
 import com.tave8.ottu.dto.UserDTO;
-import com.tave8.ottu.dto.EvaluationDTO;
-import com.tave8.ottu.entity.Evaluation;
 import com.tave8.ottu.entity.Genre;
 import com.tave8.ottu.entity.User;
 import com.tave8.ottu.service.UserService;
@@ -138,48 +136,5 @@ public class UserController {
             response.put("success",false);
             return new ResponseEntity(response,HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }
-
-
-    // 신뢰도 반영
-    @GetMapping("/evaluation/{uid}")
-    public ResponseEntity rateReliability(@PathVariable("uid")Long userIdx, @RequestBody EvaluationDTO evaluationDTO){
-
-        HashMap<String,Object> response = new HashMap<>();
-
-        try{
-            // 유저 찾기
-            User user = userService.findUserById(userIdx).orElse(null);
-
-            Evaluation evaluation = userService.getEvaluation(userIdx);
-             //평가가 처음
-            if(evaluation == null){
-                double newReliability =(double)(10+evaluationDTO.getReliability())/2;
-                userService.makeEvaluation(userIdx,newReliability);
-
-                user.setIsFirst(false);
-                user.setReliability((int)(Math.round(newReliability)));
-            }
-            else{
-                // 현재 거쳐간 회원수
-                int count = evaluation.getCount();
-                // 새로 갱신된 신뢰도
-                double newReliability = (evaluation.getReliability()*count+evaluationDTO.getReliability())/(count+1);
-                evaluation.setCount(count+1);
-                evaluation.setReliability(newReliability);
-                userService.updateEvaluation(evaluation);
-
-                user.setReliability((int)(Math.round(newReliability)));
-            }
-            userService.updateUser(user);
-
-            response.put("success",true);
-            return new ResponseEntity(response,HttpStatus.OK);
-        }
-        catch (Exception e){
-            response.put("success",false);
-            return new ResponseEntity(response,HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
     }
 }

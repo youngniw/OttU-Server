@@ -83,4 +83,8 @@ public class TeamService {
             return false;
         }
     }
+
+    public List<Long> findUserIdxByTeamIdx(Long teamIdx){
+        return userTeamRepository.findUserIdxByTeamIdx(teamIdx);
+    }
 }

@@ -4,9 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class EvaluationDTO {
-    public int reliability;
+public class TeamEvaluationDTO {
+    public Long userIdx;
+    public List<Integer> reliability;
 }

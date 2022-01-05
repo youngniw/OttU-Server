@@ -16,4 +16,7 @@ public interface UserTeamRepository extends JpaRepository<UserTeam, Long> {
 
     @Query("SELECT DISTINCT ut.user FROM UserTeam ut WHERE ut.team.teamIdx = :teamIdx")
     List<User> findAllUserByTeamIdx(@Param("teamIdx") Long teamIdx);    //해당 팀의 회원_팀를 반환함
+
+    @Query(value = "SELECT user_idx from user_team where team_idx = :teamIdx order by user_idx asc",nativeQuery = true)
+    List<Long> findUserIdxByTeamIdx(@Param("teamIdx") Long teamIdx);
 }
