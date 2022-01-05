@@ -168,7 +168,6 @@ public class UserController {
                 // 새로 갱신된 신뢰도
                 int newReliability = (reliability*count+evaluationDTO.getReliability())/(count+1);
                 user.setReliability(newReliability);
-                user.setIsFirst(false);
                 evaluation.setCount(count+1);
                 userService.updateEvaluation(evaluation);
             }
