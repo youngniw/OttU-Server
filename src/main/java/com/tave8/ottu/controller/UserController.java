@@ -1,6 +1,8 @@
 package com.tave8.ottu.controller;
 
 import com.tave8.ottu.dto.UserDTO;
+import com.tave8.ottu.dto.EvaluationDTO;
+import com.tave8.ottu.entity.Evaluation;
 import com.tave8.ottu.entity.Genre;
 import com.tave8.ottu.entity.User;
 import com.tave8.ottu.service.UserService;
@@ -136,5 +138,50 @@ public class UserController {
             response.put("success",false);
             return new ResponseEntity(response,HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+
+    // 신뢰도 반영
+    @GetMapping("/reliability/{uid}")
+    public ResponseEntity rateReliability(@PathVariable("uid")Long userIdx, @RequestBody EvaluationDTO evaluationDTO){
+
+        HashMap<String,Object> response = new HashMap<>();
+
+        try{
+            // 유저 찾기
+            User user = userService.findUserById(userIdx).orElse(null);
+            // 현재 user의 reliability 가져오기
+            int reliability = user.getReliability();
+
+            Evaluation evaluation = userService.getEvaluation(userIdx);
+             //평가가 처음
+            if(evaluation == null){
+                int newReliability = (reliability + evaluationDTO.getReliability())/2;
+                user.setIsFirst(false);
+                user.setReliability(newReliability);
+                // 만들어주기
+                userService.makeEvaluation(userIdx);
+            }
+            else{
+                // 현재 거쳐간 회원수
+                int count = evaluation.getCount();
+                // 새로 갱신된 신뢰도
+                int newReliability = (reliability*count+evaluationDTO.getReliability())/(count+1);
+                user.setReliability(newReliability);
+                user.setIsFirst(false);
+                evaluation.setCount(count+1);
+                userService.updateEvaluation(evaluation);
+            }
+            userService.updateUser(user);
+
+            response.put("success",true);
+            response.put("reliability",user.getReliability());
+            return new ResponseEntity(response,HttpStatus.OK);
+        }
+        catch (Exception e){
+            response.put("success",false);
+            return new ResponseEntity(response,HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 }

@@ -1,8 +1,10 @@
 package com.tave8.ottu.service;
 
+import com.tave8.ottu.entity.Evaluation;
 import com.tave8.ottu.entity.Genre;
 import com.tave8.ottu.entity.User;
 import com.tave8.ottu.entity.UserGenre;
+import com.tave8.ottu.repository.EvaluationRepository;
 import com.tave8.ottu.repository.GenreRepository;
 import com.tave8.ottu.repository.UserGenreRepository;
 import com.tave8.ottu.repository.UserRepository;
@@ -18,12 +20,14 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final GenreRepository genreRepository;
+    private final EvaluationRepository evaluationRepository;
 
 
     @Autowired
-    public UserService(UserRepository userRepository, GenreRepository genreRepository) {
+    public UserService(UserRepository userRepository, GenreRepository genreRepository, EvaluationRepository evaluationRepository) {
         this.userRepository = userRepository;
         this.genreRepository = genreRepository;
+        this.evaluationRepository = evaluationRepository;
     }
 
     public User getUserById(Long userIdx) {
@@ -68,4 +72,14 @@ public class UserService {
         return genreRepository.findGenreByGenreIdx(genreIdx).orElse(null);
     }
 
+    public Evaluation getEvaluation(Long userIdx){
+        return evaluationRepository.findEvaluationByUserIdx(userIdx).orElse(null);
+    }
+
+    public void updateEvaluation(Evaluation evaluation){
+        evaluationRepository.save(evaluation);
+    }
+    public void makeEvaluation(Long userIdx){
+        evaluationRepository.makeEvaluation(userIdx);
+    }
 }
