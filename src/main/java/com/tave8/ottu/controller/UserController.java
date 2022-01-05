@@ -142,7 +142,7 @@ public class UserController {
 
 
     // 신뢰도 반영
-    @GetMapping("/reliability/{uid}")
+    @GetMapping("/evalutaion/{uid}")
     public ResponseEntity rateReliability(@PathVariable("uid")Long userIdx, @RequestBody EvaluationDTO evaluationDTO){
 
         HashMap<String,Object> response = new HashMap<>();
