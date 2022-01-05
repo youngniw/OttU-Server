@@ -21,6 +21,7 @@ public class UserController {
         this.userService = userService;
     }
 
+
     @PatchMapping("/{uid}")
     public ResponseEntity joinUser(@PathVariable("uid") Long userIdx, @RequestBody UserDTO userDTO){
         HashMap<String,Object> response = new HashMap<>();
@@ -28,34 +29,26 @@ public class UserController {
             // userDTO에서 받은 userIdx로 user찾기
             User user = userService.findUserById(userIdx).orElse(null);
 
-            if(userDTO.getKakaotalkId()!=null){
+            if (userDTO.getKakaotalkId() != null) {
                 user.setKakaotalkId(userDTO.getKakaotalkId());
             }
-            else{
-                response.put("success",false);
-                return new ResponseEntity(response,HttpStatus.BAD_REQUEST);
-            }
 
-            if(userDTO.getNickname()!=null){
+            if (userDTO.getNickname() != null) {
                 user.setNickname(userDTO.getNickname());
             }
-            else{
-                response.put("success",false);
-                return new ResponseEntity(response,HttpStatus.BAD_REQUEST);
+
+            if (userDTO.getGenres() != null) {
+                List<Integer> genreList = userDTO.getGenres();
+                List<Genre> genres = new ArrayList<>();
+                for (int genre : genreList) {
+                    Genre your_genre = userService.findGenreByGenreIDx(genre);
+                    genres.add(your_genre);
+                }
+                user.setGenres(genres);
             }
 
-
-            List<Integer> genreList = userDTO.getGenres();
-            List<Genre> genres = new ArrayList<>();
-            for(int genre:genreList){
-                Genre your_genre = userService.findGenreByGenreIDx(genre);
-                genres.add(your_genre);
-            }
-
-            user.setGenres(genres);
             userService.updateUser(user);
 
-            response.put("user",user);
             response.put("success",true);
             return new ResponseEntity(response,HttpStatus.OK);
         }
