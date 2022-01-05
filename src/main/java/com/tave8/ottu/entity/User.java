@@ -53,6 +53,7 @@ public class User {
         this.isFirst = this.isFirst == null ? true : this.isFirst;
     }
 
+    @JsonIgnore
     public boolean isNoticeTokenNull() {
         if (noticeToken == null)
             return true;
