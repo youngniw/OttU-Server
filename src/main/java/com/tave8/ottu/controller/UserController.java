@@ -142,7 +142,7 @@ public class UserController {
 
 
     // 신뢰도 반영
-    @GetMapping("/evalutaion/{uid}")
+    @GetMapping("/evaluation/{uid}")
     public ResponseEntity rateReliability(@PathVariable("uid")Long userIdx, @RequestBody EvaluationDTO evaluationDTO){
 
         HashMap<String,Object> response = new HashMap<>();
@@ -150,31 +150,30 @@ public class UserController {
         try{
             // 유저 찾기
             User user = userService.findUserById(userIdx).orElse(null);
-            // 현재 user의 reliability 가져오기
-            int reliability = user.getReliability();
 
             Evaluation evaluation = userService.getEvaluation(userIdx);
              //평가가 처음
             if(evaluation == null){
-                int newReliability = (reliability + evaluationDTO.getReliability())/2;
+                double newReliability =(double)(10+evaluationDTO.getReliability())/2;
+                userService.makeEvaluation(userIdx,newReliability);
+
                 user.setIsFirst(false);
-                user.setReliability(newReliability);
-                // 만들어주기
-                userService.makeEvaluation(userIdx);
+                user.setReliability((int)(Math.round(newReliability)));
             }
             else{
                 // 현재 거쳐간 회원수
                 int count = evaluation.getCount();
                 // 새로 갱신된 신뢰도
-                int newReliability = (reliability*count+evaluationDTO.getReliability())/(count+1);
-                user.setReliability(newReliability);
+                double newReliability = (evaluation.getReliability()*count+evaluationDTO.getReliability())/(count+1);
                 evaluation.setCount(count+1);
+                evaluation.setReliability(newReliability);
                 userService.updateEvaluation(evaluation);
+
+                user.setReliability((int)(Math.round(newReliability)));
             }
             userService.updateUser(user);
 
             response.put("success",true);
-            response.put("reliability",user.getReliability());
             return new ResponseEntity(response,HttpStatus.OK);
         }
         catch (Exception e){

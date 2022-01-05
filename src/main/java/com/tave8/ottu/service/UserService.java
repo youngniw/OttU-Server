@@ -79,7 +79,7 @@ public class UserService {
     public void updateEvaluation(Evaluation evaluation){
         evaluationRepository.save(evaluation);
     }
-    public void makeEvaluation(Long userIdx){
-        evaluationRepository.makeEvaluation(userIdx);
+    public void makeEvaluation(Long userIdx,double reliability){
+        evaluationRepository.makeEvaluation(userIdx,reliability);
     }
 }

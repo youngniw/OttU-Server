@@ -12,6 +12,6 @@ public interface EvaluationRepository extends JpaRepository<Evaluation,Long> {
     Optional<Evaluation> findEvaluationByUserIdx(Long userIdx);
 
     @Modifying
-    @Query(value = "insert into evaluation  (user_idx) value (:userIdx);",nativeQuery = true)
-    void makeEvaluation (@Param("userIdx")Long userIdx);
+    @Query(value = "insert into evaluation  (user_idx,reliability) values (:userIdx,:reliability);",nativeQuery = true)
+    void makeEvaluation (@Param("userIdx")Long userIdx,double reliability);
 }

@@ -22,6 +22,9 @@ public class Evaluation {
     @Column(name = "count")
     private int count;
 
+    @Column(name = "reliability")
+    private double reliability;
+
     public Evaluation(Long userIdx) {
         this.userIdx = userIdx;
     }
