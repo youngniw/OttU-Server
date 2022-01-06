@@ -1,5 +1,6 @@
 package com.tave8.ottu.service;
 
+import com.tave8.ottu.dto.SimpleUserDTO;
 import com.tave8.ottu.entity.Team;
 import com.tave8.ottu.entity.User;
 import com.tave8.ottu.entity.UserTeam;
@@ -12,6 +13,7 @@ import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -72,8 +74,13 @@ public class TeamService {
         return userTeamRepository.findAllUserByTeamIdx(teamIdx);
     }
 
-    public List<User> findAllUserByTeamIdxAndUserIdx(Long teamIdx, Long userIdx) {
+    public List<User> findAllUserByTeamIdxExceptUserIdx(Long teamIdx, Long userIdx) {   //팀의 팀원 중 userIdx인 팀원 제외 나머지 팀원 반환
         return userTeamRepository.findAllUserByTeamIdxAndUserIdx(teamIdx, userIdx);
+    }
+
+    public List<SimpleUserDTO> findSimpleAllUserByTeamIdx(Long teamIdx) {
+        List<User> userList = userTeamRepository.findAllUserByTeamIdxOrderByUser(teamIdx);
+        return userList.stream().map(SimpleUserDTO::new).collect(Collectors.toList());
     }
 
     public Boolean isUserInTeam(Long teamIdx, Long userIdx) {

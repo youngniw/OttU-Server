@@ -35,14 +35,16 @@ public class NoticeController {
 
     @Scheduled(cron = "0 0 9 * * ?", zone = "Asia/Seoul")
     public void noticePaymentDate() {   //매일 아침 9시에 다음날이 결제일인 사람에게 알림이 가게 함
-        List<Team> paymentDayTeamList = teamService.findAllByPaymentDay(LocalDate.now().plusDays(1).getDayOfMonth());
+        LocalDate nextDay = LocalDate.now().plusDays(1);
+        List<Team> paymentDayTeamList = teamService.findAllByPaymentDay(nextDay.getDayOfMonth());
 
         for (Team team : paymentDayTeamList) {
             List<User> userList = teamService.findAllUserByTeamIdx(team.getTeamIdx());
             for (User user: userList) {
                 Notice notice = new Notice();
                 notice.setUser(user);
-                String content = team.getPlatform().getPlatformName().concat(" 결제일이 하루 남았습니다.");
+                String content = "'"+team.getPlatform().getPlatformName()+"' "+team.getHeadcount()+"인 "+team.getLeader().getNickname()
+                        +"팀 결제일이 하루 남았습니다.";
                 notice.setContent(content);
                 noticeService.save(notice);
 

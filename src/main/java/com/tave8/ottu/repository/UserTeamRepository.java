@@ -12,10 +12,13 @@ import java.util.List;
 @Repository
 public interface UserTeamRepository extends JpaRepository<UserTeam, Long> {
     @Query("SELECT DISTINCT ut.team.teamIdx FROM UserTeam ut WHERE ut.user.userIdx = :userIdx")
-    List<Long> findAllByUserIdx(@Param("userIdx") Long userIdx);            //해당 회원의 팀 번호를 반환함
+    List<Long> findAllByUserIdx(@Param("userIdx") Long userIdx);                    //해당 회원의 팀 번호를 반환함
 
     @Query("SELECT DISTINCT ut.user FROM UserTeam ut WHERE ut.team.teamIdx = :teamIdx")
-    List<User> findAllUserByTeamIdx(@Param("teamIdx") Long teamIdx);        //해당 팀의 회원_팀를 반환함
+    List<User> findAllUserByTeamIdx(@Param("teamIdx") Long teamIdx);                //해당 팀의 회원_팀를 반환함
+
+    @Query("SELECT ut.user FROM UserTeam ut WHERE ut.team.teamIdx = :teamIdx ORDER BY ut.user.userIdx ASC")
+    List<User> findAllUserByTeamIdxOrderByUser(@Param("teamIdx") Long teamIdx);     //해당 팀의 회원_팀를 반환함(유저 번호 오름차순으로)
 
     @Query("SELECT ut.user FROM UserTeam ut WHERE ut.team.teamIdx = :teamIdx AND ut.user.userIdx <> :userIdx ORDER BY ut.user.userIdx ASC")
     List<User> findAllUserByTeamIdxAndUserIdx(@Param("teamIdx") Long teamIdx, @Param("userIdx") Long userIdx);        //해당 팀의 회원_팀를 반환함
