@@ -78,8 +78,8 @@ public class TeamService {
         return userTeamRepository.findAllUserByTeamIdxAndUserIdx(teamIdx, userIdx);
     }
 
-    public List<SimpleUserDTO> findSimpleAllUserByTeamIdx(Long teamIdx) {
-        List<User> userList = userTeamRepository.findAllUserByTeamIdxOrderByUser(teamIdx);
+    public List<SimpleUserDTO> findSimpleAllUserByTeamIdx(Long teamIdx, Long userIdx) {
+        List<User> userList = userTeamRepository.findAllUserByTeamIdxAndUserIdx(teamIdx, userIdx);
         return userList.stream().map(SimpleUserDTO::new).collect(Collectors.toList());
     }
 

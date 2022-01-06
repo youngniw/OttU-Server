@@ -124,21 +124,27 @@ public class TeamController {
         }
     }
 
-    @GetMapping("/{tid}/evaluation")
-    public ResponseEntity getTeamToEvaluation(@PathVariable("tid") Long teamIdx) {
+    @GetMapping("/{tid}/evaluation/{uid}")
+    public ResponseEntity getTeamToEvaluation(@PathVariable("tid") Long teamIdx, @PathVariable("uid") Long userIdx) {
         HashMap<String,Object> response = new HashMap<>();
         try {
-            Team team = teamService.findTeamById(teamIdx).orElse(null);
-            List<SimpleUserDTO> simpleUserList = teamService.findSimpleAllUserByTeamIdx(teamIdx);
+            Optional<Team> team = teamService.findTeamById(teamIdx);
+            if (team.isPresent()) {
+                List<SimpleUserDTO> simpleUserList = teamService.findSimpleAllUserByTeamIdx(teamIdx, userIdx);
 
-            if (!team.getIsDeleted() || simpleUserList.size() <= 1) {
+                if (!team.get().getIsDeleted() || simpleUserList.size() < 1) {
+                    response.put("success", false);
+                    return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+                }
+
+                response.put("success", true);
+                response.put("userlist", simpleUserList);
+                return new ResponseEntity(response, HttpStatus.OK);
+            }
+            else {
                 response.put("success", false);
                 return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
             }
-
-            response.put("success", true);
-            response.put("userlist", simpleUserList);
-            return new ResponseEntity(response,HttpStatus.OK);
         }
         catch (Exception e) {
             response.put("success", false);
