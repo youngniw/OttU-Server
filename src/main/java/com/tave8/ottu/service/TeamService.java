@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -22,6 +23,10 @@ public class TeamService {
     public TeamService(TeamRepository teamRepository, UserTeamRepository userTeamRepository) {
         this.teamRepository = teamRepository;
         this.userTeamRepository = userTeamRepository;
+    }
+
+    public Optional<Team> findTeamById(Long teamIdx) {
+        return teamRepository.findById(teamIdx);
     }
 
     public Team getTeamById(Long teamIdx) {
@@ -67,6 +72,17 @@ public class TeamService {
         return userTeamRepository.findAllUserByTeamIdx(teamIdx);
     }
 
+    public List<User> findAllUserByTeamIdxAndUserIdx(Long teamIdx, Long userIdx) {
+        return userTeamRepository.findAllUserByTeamIdxAndUserIdx(teamIdx, userIdx);
+    }
+
+    public Boolean isUserInTeam(Long teamIdx, Long userIdx) {
+        if (userTeamRepository.countUserTeamByTeam_TeamIdxAndUser_UserIdx(teamIdx, userIdx) > 0)
+            return true;
+        else
+            return false;
+    }
+
     public Team saveTeam(Team team) {
         return teamRepository.save(team);
     }
@@ -82,9 +98,5 @@ public class TeamService {
         } catch (Exception e) {
             return false;
         }
-    }
-
-    public List<Long> findUserIdxByTeamIdx(Long teamIdx){
-        return userTeamRepository.findUserIdxByTeamIdx(teamIdx);
     }
 }

@@ -3,7 +3,6 @@ package com.tave8.ottu.controller;
 import com.tave8.ottu.dto.OttTeamDTO;
 import com.tave8.ottu.dto.TeamEvaluationDTO;
 import com.tave8.ottu.entity.*;
-import com.tave8.ottu.repository.UserTeamRepository;
 import com.tave8.ottu.service.RecruitService;
 import com.tave8.ottu.service.TeamService;
 import com.tave8.ottu.service.UserService;
@@ -17,7 +16,6 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class TeamController {
@@ -26,7 +24,7 @@ public class TeamController {
     private final UserService userService;
 
     @Autowired
-    public TeamController(TeamService teamService, RecruitService recruitService,UserService userService) {
+    public TeamController(TeamService teamService, RecruitService recruitService, UserService userService) {
         this.teamService = teamService;
         this.recruitService = recruitService;
         this.userService = userService;
@@ -111,62 +109,57 @@ public class TeamController {
     }
 
     // 신뢰도 반영
-    @GetMapping("/team/{tid}/evaluation")
-    public ResponseEntity rateTeamReliability(@PathVariable("tid")Long teamIdx, @RequestBody TeamEvaluationDTO teamEvaluationDTO){
-
+    @PostMapping("/team/{tid}/evaluation")
+    public ResponseEntity rateTeamReliability(@PathVariable("tid") Long teamIdx, @RequestBody TeamEvaluationDTO teamEvaluationDTO){
         HashMap<String,Object> response = new HashMap<>();
-
         try{
-            // 팀정보에서 userIdx 가져와야지
-            List<Long> userList = teamService.findUserIdxByTeamIdx(teamIdx);
+            // 팀정보에서 userIdx를 제외한 나머지 user들 가져와야지
+            Team team = teamService.findTeamById(teamIdx).orElse(null);
+            List<User> userList = teamService.findAllUserByTeamIdxAndUserIdx(teamIdx, teamEvaluationDTO.getUserIdx());
             List<Integer> evaluationList = teamEvaluationDTO.getReliability();
 
-            // evaluationList에서 자기자신을 삭제시켜줌
-            for(int i=0;i<userList.size();i++){
-                if (userList.get(i)==teamEvaluationDTO.getUserIdx()){
-                    userList.remove(i);
-                }
+            // 팀이 해지되었는지 여부 || 평가자가 해당 팀에 포함되어 있는지 여부 || userList는 자신이 포함, evaluationList는 자신이 포함 x
+            if (!team.getIsDeleted() || !teamService.isUserInTeam(teamIdx, teamEvaluationDTO.getUserIdx()) || userList.size() != evaluationList.size()){
+                response.put("success", false);
+                return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
             }
 
-            System.out.println(userList.size());
-            // userList는 자신이 포함, evaluationList는 자신이 포함 x
-            if(userList.size() != evaluationList.size()){
-                response.put("success",false);
-                return new ResponseEntity(response,HttpStatus.BAD_REQUEST);
-            }
-
-            for(int i =0; i<userList.size();i++){
-                // user 찾기
-                User user = userService.findUserById(userList.get(i)).orElse(null);
+            for (int i=0; i<userList.size(); i++) {
+                User user = userList.get(i);
                 // evaluation 가져오기
                 Evaluation evaluation = userService.getEvaluation(user.getUserIdx());
 
-                if(evaluation == null){
+                if (evaluation == null) {
                     double newReliability =(double)(10+evaluationList.get(i))/2;
-                    userService.makeEvaluation(user.getUserIdx(),newReliability);
+
+                    Evaluation newEvaluation = new Evaluation();
+                    newEvaluation.setUser(user);
+                    newEvaluation.setReliability(newReliability);
+                    userService.saveEvaluation(newEvaluation);
 
                     user.setIsFirst(false);
                     user.setReliability((int)(Math.round(newReliability)));
                 }
-                else{
+                else {
                     // 현재 거쳐간 회원수
                     int count = evaluation.getCount();
                     // 새로 갱신된 신뢰도
                     double newReliability = (evaluation.getReliability()*count+evaluationList.get(i))/(count+1);
+
                     evaluation.setCount(count+1);
                     evaluation.setReliability(newReliability);
-                    userService.updateEvaluation(evaluation);
+                    userService.saveEvaluation(evaluation);
 
                     user.setReliability((int)(Math.round(newReliability)));
                 }
                 userService.updateUser(user);
             }
 
-            response.put("success",true);
+            response.put("success", true);
             return new ResponseEntity(response,HttpStatus.OK);
         }
         catch (Exception e){
-            response.put("success",false);
+            response.put("success", false);
             return new ResponseEntity(response,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

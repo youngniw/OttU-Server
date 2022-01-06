@@ -14,18 +14,22 @@ import javax.persistence.*;
 public class Evaluation {
     @Id
     @Column(name = "evaluation_idx")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long evaluationIdx;
 
-    @Column(name = "user_idx")
-    private Long userIdx;
+    @OneToOne
+    @JoinColumn(name="user_idx")
+    private User user;
 
     @Column(name = "count")
-    private int count;
+    private Integer count;
 
     @Column(name = "reliability")
-    private double reliability;
+    private Double reliability;
 
-    public Evaluation(Long userIdx) {
-        this.userIdx = userIdx;
+    @PrePersist
+    public void prePersist() {
+        this.count = this.count == null ? 2 : this.count;
+        this.reliability = this.reliability == null ? 10 : this.reliability;
     }
 }
