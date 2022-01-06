@@ -44,7 +44,6 @@ public class MypageController {
         }
     }
 
-    //TODO: 확인 요망!!!!!!!!!!!!
     //내가 쓴 게시글 조회
     @GetMapping("/user/{uid}/post")
     public ResponseEntity getMyPostList(@PathVariable("uid") Long userIdx){

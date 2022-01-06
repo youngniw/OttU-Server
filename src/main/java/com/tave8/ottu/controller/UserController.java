@@ -41,7 +41,7 @@ public class UserController {
                 List<Integer> genreList = userDTO.getGenres();
                 List<Genre> genres = new ArrayList<>();
                 for (int genre : genreList) {
-                    Genre your_genre = userService.findGenreByGenreIDx(genre);
+                    Genre your_genre = userService.findGenreByGenreIdx(genre);
                     genres.add(your_genre);
                 }
                 user.setGenres(genres);

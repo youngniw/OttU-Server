@@ -46,7 +46,6 @@ public class User {
     @JoinTable(name = "user_genre", joinColumns = @JoinColumn(name = "user_idx"), inverseJoinColumns = @JoinColumn(name = "genre_idx"))
     private List<Genre> genres = new ArrayList<>();
 
-
     @PrePersist
     public void prePersist() {  //기본 값 설정함
         this.reliability = this.reliability == null ? 10 : this.reliability;

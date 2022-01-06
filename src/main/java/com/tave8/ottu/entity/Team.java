@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -34,6 +35,7 @@ public class Team {
 
     @JsonIgnore
     @Column(name = "created_date")
+    @CreationTimestamp
     private LocalDateTime createdDate;
 
     @Column(name = "payment_day")
