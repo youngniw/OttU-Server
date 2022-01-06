@@ -25,6 +25,9 @@ public class Notice {
     @JoinColumn(name = "user_idx")
     private User user;
 
+    @Column(name = "evaluate_team_idx")
+    private Long evaluateTeamIdx;
+
     @Column
     private String content;
 

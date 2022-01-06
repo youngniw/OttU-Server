@@ -1,8 +1,10 @@
 package com.tave8.ottu.controller;
 
 import com.tave8.ottu.dto.OttTeamDTO;
+import com.tave8.ottu.dto.SimpleUserDTO;
 import com.tave8.ottu.dto.TeamEvaluationDTO;
 import com.tave8.ottu.entity.*;
+import com.tave8.ottu.service.NoticeService;
 import com.tave8.ottu.service.RecruitService;
 import com.tave8.ottu.service.TeamService;
 import com.tave8.ottu.service.UserService;
@@ -18,20 +20,23 @@ import java.util.HashMap;
 import java.util.List;
 
 @RestController
+@RequestMapping(value = "/team")
 public class TeamController {
     private final TeamService teamService;
     private final RecruitService recruitService;
     private final UserService userService;
+    private final NoticeService noticeService;
 
     @Autowired
-    public TeamController(TeamService teamService, RecruitService recruitService, UserService userService) {
+    public TeamController(TeamService teamService, RecruitService recruitService, UserService userService, NoticeService noticeService) {
         this.teamService = teamService;
         this.recruitService = recruitService;
         this.userService = userService;
+        this.noticeService = noticeService;
     }
 
     //결제 일자 입력 후 팀 생성
-    @PostMapping("/team")
+    @PostMapping
     public ResponseEntity postRecruitTeam(@RequestBody OttTeamDTO ottTeamDTO) {
         HashMap<String, Object> response = new HashMap<>();
         try {
@@ -87,14 +92,24 @@ public class TeamController {
     }
 
     //팀 삭제
-    @DeleteMapping("/team/{tid}")
+    @DeleteMapping("/{tid}")
     public ResponseEntity deleteRecruit(@PathVariable("tid") Long teamIdx) {
-        //TODO: 팀원 평가가 이루어지게 해야 함!
         HashMap<String, Object> response = new HashMap<>();
         try {
             Team team = teamService.getTeamById(teamIdx);
             team.setIsDeleted(true);
             if (teamService.saveTeamIsDeleted(team)) {
+                List<User> teamUserList = teamService.findAllUserByTeamIdx(teamIdx);
+                for (User user : teamUserList) {
+                    Notice notice = new Notice();
+                    notice.setUser(user);
+                    notice.setEvaluateTeamIdx(teamIdx);
+                    String content = "팀원의 해지로 '"+team.getPlatform().getPlatformName()+"' "+team.getLeader().getNickname()+"팀이 해체되었습니다.\n"
+                            +"팀원 평가를 진행해 주세요.";
+                    notice.setContent(content);
+                    noticeService.save(notice);
+                }
+
                 response.put("success", true);
                 return new ResponseEntity(response, HttpStatus.OK);
             }
@@ -108,14 +123,36 @@ public class TeamController {
         }
     }
 
+    @GetMapping("/{tid}/evaluation")
+    public ResponseEntity getTeamToEvaluation(@PathVariable("tid") Long teamIdx) {
+        HashMap<String,Object> response = new HashMap<>();
+        try {
+            Team team = teamService.findTeamById(teamIdx).orElse(null);
+            List<SimpleUserDTO> simpleUserList = teamService.findSimpleAllUserByTeamIdx(teamIdx);
+
+            if (!team.getIsDeleted() || simpleUserList.size() <= 1) {
+                response.put("success", false);
+                return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+            }
+
+            response.put("success", true);
+            response.put("userlist", simpleUserList);
+            return new ResponseEntity(response,HttpStatus.OK);
+        }
+        catch (Exception e) {
+            response.put("success", false);
+            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     // 신뢰도 반영
-    @PostMapping("/team/{tid}/evaluation")
-    public ResponseEntity rateTeamReliability(@PathVariable("tid") Long teamIdx, @RequestBody TeamEvaluationDTO teamEvaluationDTO){
+    @PostMapping("/{tid}/evaluation")
+    public ResponseEntity postTeamReliability(@PathVariable("tid") Long teamIdx, @RequestBody TeamEvaluationDTO teamEvaluationDTO) {
         HashMap<String,Object> response = new HashMap<>();
         try{
             // 팀정보에서 userIdx를 제외한 나머지 user들 가져와야지
             Team team = teamService.findTeamById(teamIdx).orElse(null);
-            List<User> userList = teamService.findAllUserByTeamIdxAndUserIdx(teamIdx, teamEvaluationDTO.getUserIdx());
+            List<User> userList = teamService.findAllUserByTeamIdxExceptUserIdx(teamIdx, teamEvaluationDTO.getUserIdx());
             List<Integer> evaluationList = teamEvaluationDTO.getReliability();
 
             // 팀이 해지되었는지 여부 || 평가자가 해당 팀에 포함되어 있는지 여부 || userList는 자신이 포함, evaluationList는 자신이 포함 x
