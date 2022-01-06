@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -20,6 +21,10 @@ public class NoticeService {
 
     public Notice save(Notice notice) {
         return noticeRepository.save(notice);
+    }
+
+    public Optional<Notice> findByTeamIdxAndUserIdx(Long teamIdx, Long userIdx) {
+        return noticeRepository.findByUserIdxAndTeamIdx(teamIdx, userIdx);
     }
 
     public List<Notice> findAllByUserIdx(Long userIdx) {

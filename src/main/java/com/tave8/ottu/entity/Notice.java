@@ -35,6 +35,14 @@ public class Notice {
     @CreationTimestamp
     private LocalDateTime createdDate;
 
+    @Column(name = "is_evaluated")
+    private Boolean isEvaluated;
+
+    @PrePersist
+    public void prePersist() {
+        this.isEvaluated = this.isEvaluated == null ? false : this.isEvaluated;
+    }
+
     @Override
     public String toString() {
         return "Notice{" +

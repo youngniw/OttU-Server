@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/team")
@@ -192,10 +193,14 @@ public class TeamController {
                 userService.updateUser(user);
             }
 
+            Optional<Notice> notice = noticeService.findByTeamIdxAndUserIdx(teamIdx, teamEvaluationDTO.getUserIdx());
+            notice.get().setIsEvaluated(true);
+            noticeService.save(notice.get());
+
             response.put("success", true);
             return new ResponseEntity(response,HttpStatus.OK);
         }
-        catch (Exception e){
+        catch (Exception e) {
             response.put("success", false);
             return new ResponseEntity(response,HttpStatus.INTERNAL_SERVER_ERROR);
         }
