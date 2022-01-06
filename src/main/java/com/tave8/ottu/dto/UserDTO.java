@@ -13,9 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDTO {
-//    public String success;
-//    private User user;
-public String kakaotalkId;
-public String nickname;
-public List<Integer> genres;
+    public String kakaotalkId;
+    public String nickname;
+    public List<Integer> genres;
 }

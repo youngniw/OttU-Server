@@ -36,7 +36,5 @@ class UserServiceTest {
         writer.setNickname("유저1");
 
          */
-
-        //TODO: 검사해봐야 함!
     }
 }

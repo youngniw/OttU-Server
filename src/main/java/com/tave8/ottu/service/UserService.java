@@ -1,16 +1,15 @@
 package com.tave8.ottu.service;
 
+import com.tave8.ottu.entity.Evaluation;
 import com.tave8.ottu.entity.Genre;
 import com.tave8.ottu.entity.User;
-import com.tave8.ottu.entity.UserGenre;
+import com.tave8.ottu.repository.EvaluationRepository;
 import com.tave8.ottu.repository.GenreRepository;
-import com.tave8.ottu.repository.UserGenreRepository;
 import com.tave8.ottu.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -18,12 +17,13 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final GenreRepository genreRepository;
-
+    private final EvaluationRepository evaluationRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository, GenreRepository genreRepository) {
+    public UserService(UserRepository userRepository, GenreRepository genreRepository, EvaluationRepository evaluationRepository) {
         this.userRepository = userRepository;
         this.genreRepository = genreRepository;
+        this.evaluationRepository = evaluationRepository;
     }
 
     public User getUserById(Long userIdx) {
@@ -64,8 +64,15 @@ public class UserService {
         userRepository.delete(user);
     }
 
-    public Genre findGenreByGenreIDx(int genreIdx){
+    public Genre findGenreByGenreIdx(int genreIdx){
         return genreRepository.findGenreByGenreIdx(genreIdx).orElse(null);
     }
 
+    public Evaluation getEvaluation(Long userIdx){
+        return evaluationRepository.findByUser_UserIdx(userIdx).orElse(null);
+    }
+
+    public void saveEvaluation(Evaluation evaluation){
+        evaluationRepository.save(evaluation);
+    }
 }

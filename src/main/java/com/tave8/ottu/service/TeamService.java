@@ -1,5 +1,6 @@
 package com.tave8.ottu.service;
 
+import com.tave8.ottu.dto.SimpleUserDTO;
 import com.tave8.ottu.entity.Team;
 import com.tave8.ottu.entity.User;
 import com.tave8.ottu.entity.UserTeam;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -22,6 +25,10 @@ public class TeamService {
     public TeamService(TeamRepository teamRepository, UserTeamRepository userTeamRepository) {
         this.teamRepository = teamRepository;
         this.userTeamRepository = userTeamRepository;
+    }
+
+    public Optional<Team> findTeamById(Long teamIdx) {
+        return teamRepository.findById(teamIdx);
     }
 
     public Team getTeamById(Long teamIdx) {
@@ -65,6 +72,22 @@ public class TeamService {
 
     public List<User> findAllUserByTeamIdx(Long teamIdx) {
         return userTeamRepository.findAllUserByTeamIdx(teamIdx);
+    }
+
+    public List<User> findAllUserByTeamIdxExceptUserIdx(Long teamIdx, Long userIdx) {   //팀의 팀원 중 userIdx인 팀원 제외 나머지 팀원 반환
+        return userTeamRepository.findAllUserByTeamIdxAndUserIdx(teamIdx, userIdx);
+    }
+
+    public List<SimpleUserDTO> findSimpleAllUserByTeamIdx(Long teamIdx, Long userIdx) {
+        List<User> userList = userTeamRepository.findAllUserByTeamIdxAndUserIdx(teamIdx, userIdx);
+        return userList.stream().map(SimpleUserDTO::new).collect(Collectors.toList());
+    }
+
+    public Boolean isUserInTeam(Long teamIdx, Long userIdx) {
+        if (userTeamRepository.countUserTeamByTeam_TeamIdxAndUser_UserIdx(teamIdx, userIdx) > 0)
+            return true;
+        else
+            return false;
     }
 
     public Team saveTeam(Team team) {
