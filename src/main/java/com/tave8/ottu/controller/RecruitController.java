@@ -27,8 +27,8 @@ public class RecruitController {
     }
 
     //모집글들 받아오기
-    @GetMapping("/{pid}/list")
-    public ResponseEntity getRecruitList(@PathVariable("pid") int platformIdx, @RequestParam(value = "headcount", required = false) Integer headcount) {
+    @GetMapping("/{pid}/list/{uid}")
+    public ResponseEntity getRecruitList(@PathVariable("pid") int platformIdx, @PathVariable("uid") Long userIdx, @RequestParam(value = "headcount", required = false) Integer headcount) {
         HashMap<String, Object> response = new HashMap<>();
         try {
             List<Recruit> recruitList;
@@ -36,7 +36,10 @@ public class RecruitController {
                 recruitList = recruitService.findAllByPlatform(platformIdx);
             else
                 recruitList = recruitService.findAllByPlatformAndHeadcount(platformIdx, headcount);
-            recruitList.forEach(recruit -> recruit.setChoiceNum(recruitService.findRecruitChoiceNum(recruit.getRecruitIdx())));     //현재 수락된 참여자 수 저장
+            recruitList.forEach(recruit -> {
+                recruit.setChoiceNum(recruitService.findRecruitChoiceNum(recruit.getRecruitIdx()));                 //현재 수락된 참여자 수 저장
+                recruit.setIsApplying(recruitService.findByUserApplyingRecruit(recruit.getRecruitIdx(), userIdx));  //회원이 참여요청 했는 지 확인 가능
+            });
 
             response.put("success", true);
             response.put("recruitlist", recruitList);
@@ -116,13 +119,15 @@ public class RecruitController {
     public ResponseEntity postParticipate(@RequestBody Map<String, Long> requestBody) {
         HashMap<String, Object> response = new HashMap<>();
         try {
-            Optional<Recruit> recruit = recruitService.findRecruitById(requestBody.get("recruitIdx"));
-            if (!recruit.get().getIsCompleted()) {
+            Long recruitIdx = requestBody.get("recruitIdx");
+            Long userIdx = requestBody.get("userIdx");
+            Optional<Recruit> recruit = recruitService.findRecruitById(recruitIdx);
+            if (!recruit.get().getIsCompleted() || !recruitService.findByUserApplyingRecruit(recruitIdx, userIdx)) {
                 Waitlist waiting = new Waitlist();
                 waiting.setRecruit(recruit.get());
 
                 User user = new User();
-                user.setUserIdx(requestBody.get("userIdx"));
+                user.setUserIdx(userIdx);
                 waiting.setUser(user);
 
                 boolean participate = recruitService.participate(waiting);

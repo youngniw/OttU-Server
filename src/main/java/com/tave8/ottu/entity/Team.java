@@ -26,6 +26,9 @@ public class Team {
     @JoinColumn(name = "leader_idx")
     private User leader;                        //팀장 정보(다대일 연관관계)
 
+    @Transient
+    private String teamName;
+
     @ManyToOne
     @JoinColumn(name = "platform_idx")
     private Platform platform;                  //플랫폼 정보(다대일 연관관계)

@@ -107,4 +107,11 @@ public class RecruitService {
             return false;
         }
     }
+
+    public boolean findByUserApplyingRecruit(Long recruitIdx, Long userIdx) {
+        if (waitlistRepository.countWaitlistByRecruit_RecruitIdxAndUser_UserIdx(recruitIdx, userIdx) > 0)
+            return true;
+        else
+            return false;
+    }
 }
