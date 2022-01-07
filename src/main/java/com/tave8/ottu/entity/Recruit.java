@@ -34,6 +34,9 @@ public class Recruit {
     @Transient
     private Long choiceNum = 0L;
 
+    @Transient
+    private Boolean isApplying = false;
+
     @Column(name = "is_completed", columnDefinition = "boolean default false")
     private Boolean isCompleted;
 

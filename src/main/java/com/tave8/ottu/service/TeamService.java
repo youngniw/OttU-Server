@@ -53,6 +53,8 @@ public class TeamService {
                     else
                         team.setPaymentDate(LocalDate.of(year, month+1, team.getPaymentDay()));
                 }
+
+                team.setTeamName(team.getLeader().getNickname());
             });
 
             teamList.sort((o1, o2) -> {
