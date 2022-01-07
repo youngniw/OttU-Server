@@ -69,15 +69,28 @@ public class TeamController {
 
             Team savedTeam = teamService.saveTeam(team);
 
+            String content = "'"+recruit.getPlatform().getPlatformName()+"' "+recruit.getHeadcount()+"인 "+recruit.getWriter().getNickname()+"팀이 생성되었습니다.";
+
             UserTeam leaderTeam = new UserTeam();                       //리더
             leaderTeam.setUser(recruit.getWriter());
             leaderTeam.setTeam(savedTeam);
             teamService.saveUserTeam(leaderTeam);
+
+            Notice notice = new Notice();
+            notice.setUser(recruit.getWriter());
+            notice.setContent(content);
+            noticeService.save(notice);
+
             for (Waitlist waitlist : recruitAcceptedWaitlist) {         //팀원
                 UserTeam userTeam = new UserTeam();
                 userTeam.setUser(waitlist.getUser());
                 userTeam.setTeam(savedTeam);
                 teamService.saveUserTeam(userTeam);
+
+                Notice newNotice = new Notice();
+                newNotice.setUser(waitlist.getUser());
+                newNotice.setContent(content);
+                noticeService.save(newNotice);
             }
 
             recruitService.deleteNonAcceptedWaitlist(ottTeamDTO.getRecruitIdx());
@@ -101,16 +114,24 @@ public class TeamController {
             team.setIsDeleted(true);
             if (teamService.saveTeamIsDeleted(team)) {
                 List<User> teamUserList = teamService.findAllUserByTeamIdx(teamIdx);
-                for (User user : teamUserList) {
+                if (teamUserList.size() == 1) {     //1인 팀
                     Notice notice = new Notice();
-                    notice.setUser(user);
-                    notice.setEvaluateTeamIdx(teamIdx);
-                    String content = "팀원의 해지로 '"+team.getPlatform().getPlatformName()+"' "+team.getLeader().getNickname()+"팀이 해체되었습니다.\n"
-                            +"팀원 평가를 진행해 주세요.";
+                    notice.setUser(teamUserList.get(0));
+                    String content = "'"+team.getPlatform().getPlatformName()+"' "+team.getHeadcount()+"인 "+team.getLeader().getNickname()+"팀이 해체되었습니다.";
                     notice.setContent(content);
                     noticeService.save(notice);
                 }
-
+                else {
+                    for (User user : teamUserList) {
+                        Notice notice = new Notice();
+                        notice.setUser(user);
+                        notice.setEvaluateTeamIdx(teamIdx);
+                        String content = "팀원의 해지로 '"+team.getPlatform().getPlatformName()+"' "+team.getLeader().getNickname()+"팀이 해체되었습니다.\n"
+                                +"팀원 평가를 진행해 주세요.";
+                        notice.setContent(content);
+                        noticeService.save(notice);
+                    }
+                }
                 response.put("success", true);
                 return new ResponseEntity(response, HttpStatus.OK);
             }
