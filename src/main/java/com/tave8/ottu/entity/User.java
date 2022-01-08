@@ -53,7 +53,7 @@ public class User {
     }
 
     @JsonIgnore
-    public boolean isNoticeTokenNull() {
+    public boolean isNoticeTokenNull() {    //DB에 저장된 회원의 토큰 값이 null인지 여부
         if (noticeToken == null)
             return true;
         else

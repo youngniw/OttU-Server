@@ -23,8 +23,8 @@ public class UserController {
 
 
     @PatchMapping("/{uid}")
-    public ResponseEntity joinUser(@PathVariable("uid") Long userIdx, @RequestBody UserDTO userDTO){
-        HashMap<String,Object> response = new HashMap<>();
+    public ResponseEntity<Map<String, Object>> joinUser(@PathVariable("uid") Long userIdx, @RequestBody UserDTO userDTO){
+        HashMap<String, Object> response = new HashMap<>();
         try {
             // userDTO에서 받은 userIdx로 user찾기
             User user = userService.findUserById(userIdx).orElse(null);
@@ -50,74 +50,74 @@ public class UserController {
             userService.updateUser(user);
 
             response.put("success",true);
-            return new ResponseEntity(response,HttpStatus.OK);
+            return new ResponseEntity<>(response,HttpStatus.OK);
         }
         catch (Exception e){
             response.put("success",false);
-            return new ResponseEntity(response,HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PatchMapping("/{uid}/notice-token")
-    public ResponseEntity patchUserNoticeToken(@PathVariable("uid") Long userIdx, @RequestBody Map<String, String> requestBody) {
-        HashMap<String,Object> response = new HashMap<>();
+    public ResponseEntity<Map<String, Object>> patchUserNoticeToken(@PathVariable("uid") Long userIdx, @RequestBody Map<String, String> requestBody) {
+        HashMap<String, Object> response = new HashMap<>();     //안드로이드에서 사용되는 noticeToken
         try {
             User user = userService.getUserById(userIdx);
-            if (user.isNoticeTokenNull() != false && user.getNoticeToken().equals(requestBody.get("notice_token"))) {
-                response.put("success",true);
-                return new ResponseEntity(response,HttpStatus.OK);
+            if (!user.isNoticeTokenNull() && user.getNoticeToken().equals(requestBody.get("notice_token"))) {   //기존에 저장된 token과 동일할 시
+                response.put("success", true);
+                return new ResponseEntity<>(response, HttpStatus.OK);
             }
             else {
                 user.setNoticeToken(requestBody.get("notice_token"));
                 if (userService.saveUser(user)) {
                     response.put("success", true);
-                    return new ResponseEntity(response,HttpStatus.OK);
+                    return new ResponseEntity<>(response, HttpStatus.OK);
                 }
                 else {
                     response.put("success", false);
-                    return new ResponseEntity(response,HttpStatus.INTERNAL_SERVER_ERROR);
+                    return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
                 }
             }
         }
         catch (Exception e){
             response.put("success",false);
-            return new ResponseEntity(response,HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/{uid}")
-    public ResponseEntity getUser(@PathVariable("uid") Long userIdx) {      //유저 정보 전달
+    public ResponseEntity<Map<String, Object>> getUser(@PathVariable("uid") Long userIdx) {      //유저 정보 전달
         Optional<User> user = userService.findUserById(userIdx);
 
         HashMap<String, Object> response = new HashMap<>();
         if (user.isPresent()) {
             response.put("success", true);
             response.put("user", user);
-            return new ResponseEntity(response, HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         else {
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
 
     @GetMapping("/nickname/{nickname}")
-    public ResponseEntity checkExistNickname(@PathVariable("nickname") String nickname) {
+    public ResponseEntity<Map<String, Object>> checkExistNickname(@PathVariable("nickname") String nickname) {
         HashMap<String, Object> response = new HashMap<>();
         try {
             boolean isExisted = userService.isExistedNickname(nickname);
             response.put("success", true);
             response.put("isExisted", isExisted);
-            return new ResponseEntity(response, HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
 
     @DeleteMapping("/{uid}")
-    public ResponseEntity deleteUser(@PathVariable("uid") Long userIdx){
+    public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable("uid") Long userIdx){
 
         HashMap<String,Object> response = new HashMap<>();
 
@@ -125,16 +125,16 @@ public class UserController {
             User user = userService.findUserById(userIdx).orElse(null);
             if(user == null){
                 response.put("success",false);
-                return new ResponseEntity(response,HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
             }
             userService.deleteUser(user);
 
             response.put("success",true);
-            return new ResponseEntity(response,HttpStatus.OK);
+            return new ResponseEntity<>(response,HttpStatus.OK);
         }
         catch (Exception e){
             response.put("success",false);
-            return new ResponseEntity(response,HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

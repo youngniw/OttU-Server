@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -38,24 +39,24 @@ public class TeamController {
 
     //결제 일자 입력 후 팀 생성
     @PostMapping
-    public ResponseEntity postRecruitTeam(@RequestBody OttTeamDTO ottTeamDTO) {
+    public ResponseEntity<Map<String, Object>> postRecruitTeam(@RequestBody OttTeamDTO ottTeamDTO) {
         HashMap<String, Object> response = new HashMap<>();
         try {
             Recruit recruit = recruitService.getRecruitById(ottTeamDTO.getRecruitIdx());
 
             if (!ottTeamDTO.getUserIdx().equals(recruit.getWriter().getUserIdx())) {
                 response.put("success", false);
-                return new ResponseEntity(response, HttpStatus.UNAUTHORIZED);
+                return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
             }
-            else if (recruit.getIsTeam() == true) {
+            else if (recruit.getIsTeam()) {
                 response.put("success", false);
                 response.put("isTeam", true);
-                return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
             }
             else if (Period.between(recruit.getConfirmedDate().toLocalDate(), LocalDate.now()).getDays() > 7) {
                 response.put("success", false);
                 response.put("timeout", true);
-                return new ResponseEntity(response, HttpStatus.FORBIDDEN);
+                return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
             }
 
             List<Waitlist> recruitAcceptedWaitlist = recruitService.findAcceptedWaitlist(ottTeamDTO.getRecruitIdx());
@@ -98,16 +99,16 @@ public class TeamController {
             recruitService.saveRecruit(recruit);
 
             response.put("success", true);
-            return new ResponseEntity(response, HttpStatus.CREATED);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
         } catch (Exception e) {
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     //팀 삭제
     @DeleteMapping("/{tid}")
-    public ResponseEntity deleteRecruit(@PathVariable("tid") Long teamIdx) {
+    public ResponseEntity<Map<String, Object>> deleteRecruit(@PathVariable("tid") Long teamIdx) {
         HashMap<String, Object> response = new HashMap<>();
         try {
             Team team = teamService.getTeamById(teamIdx);
@@ -133,20 +134,20 @@ public class TeamController {
                     }
                 }
                 response.put("success", true);
-                return new ResponseEntity(response, HttpStatus.OK);
+                return new ResponseEntity<>(response, HttpStatus.OK);
             }
             else {
                 response.put("success", false);
-                return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } catch (Exception e) {
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/{tid}/evaluation/{uid}")
-    public ResponseEntity getTeamToEvaluation(@PathVariable("tid") Long teamIdx, @PathVariable("uid") Long userIdx) {
+    public ResponseEntity<Map<String, Object>> getTeamToEvaluation(@PathVariable("tid") Long teamIdx, @PathVariable("uid") Long userIdx) {
         HashMap<String,Object> response = new HashMap<>();
         try {
             Optional<Team> team = teamService.findTeamById(teamIdx);
@@ -155,30 +156,30 @@ public class TeamController {
 
                 if (!team.get().getIsDeleted() || simpleUserList.size() < 1) {
                     response.put("success", false);
-                    return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
                 }
 
                 response.put("success", true);
                 response.put("platform", team.get().getPlatform());
                 response.put("userlist", simpleUserList);
-                return new ResponseEntity(response, HttpStatus.OK);
+                return new ResponseEntity<>(response, HttpStatus.OK);
             }
             else {
                 response.put("success", false);
-                return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
             }
         }
         catch (Exception e) {
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     // 신뢰도 반영
     @PostMapping("/{tid}/evaluation")
-    public ResponseEntity postTeamReliability(@PathVariable("tid") Long teamIdx, @RequestBody TeamEvaluationDTO teamEvaluationDTO) {
+    public ResponseEntity<Map<String, Object>> postTeamReliability(@PathVariable("tid") Long teamIdx, @RequestBody TeamEvaluationDTO teamEvaluationDTO) {
         HashMap<String,Object> response = new HashMap<>();
-        try{
+        try {
             // 팀정보에서 userIdx를 제외한 나머지 user들 가져와야지
             Team team = teamService.findTeamById(teamIdx).orElse(null);
             List<User> userList = teamService.findAllUserByTeamIdxExceptUserIdx(teamIdx, teamEvaluationDTO.getUserIdx());
@@ -187,7 +188,7 @@ public class TeamController {
             // 팀이 해지되었는지 여부 || 평가자가 해당 팀에 포함되어 있는지 여부 || userList는 자신이 포함, evaluationList는 자신이 포함 x
             if (!team.getIsDeleted() || !teamService.isUserInTeam(teamIdx, teamEvaluationDTO.getUserIdx()) || userList.size() != evaluationList.size()){
                 response.put("success", false);
-                return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
             }
 
             for (int i=0; i<userList.size(); i++) {
@@ -226,11 +227,11 @@ public class TeamController {
             noticeService.save(notice.get());
 
             response.put("success", true);
-            return new ResponseEntity(response,HttpStatus.OK);
+            return new ResponseEntity<>(response,HttpStatus.OK);
         }
         catch (Exception e) {
             response.put("success", false);
-            return new ResponseEntity(response,HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
