@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class NoticeController {
@@ -58,17 +59,17 @@ public class NoticeController {
     }
 
     @GetMapping("/user/{uid}/notice")
-    public ResponseEntity getUserNoticeList(@PathVariable("uid") Long userIdx) {
+    public ResponseEntity<Map<String, Object>> getUserNoticeList(@PathVariable("uid") Long userIdx) {
         HashMap<String, Object> response = new HashMap<>();
         try {
             List<Notice> noticeList = noticeService.findAllByUserIdx(userIdx);
 
             response.put("success", true);
             response.put("noticelist", noticeList);
-            return new ResponseEntity(response, HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

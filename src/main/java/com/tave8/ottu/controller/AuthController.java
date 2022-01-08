@@ -31,7 +31,7 @@ public class AuthController {
 
     //카카오 로그인
     @PostMapping("/kakao")
-    public ResponseEntity kakaoLogin(HttpServletRequest request, @RequestBody(required = false) Map<String, String> requestBody) {
+    public ResponseEntity<Map<String, Object>> kakaoLogin(HttpServletRequest request, @RequestBody(required = false) Map<String, String> requestBody) {
         //access_token으로 카카오 로그인함
         if (requestBody != null) {
             String accessToken = requestBody.get("access_token");
@@ -55,7 +55,7 @@ public class AuthController {
                 );
             } catch (Exception e) {     //kakao로부터 받은 응답이 statusCode=200이 아님
                 response.put("success", false);
-                return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
             }
 
             ObjectMapper objectMapper = new ObjectMapper();
@@ -66,7 +66,7 @@ public class AuthController {
                 email = kakao_account.path("email").asText();
             } catch (JsonProcessingException e) {   //JsonNode를 못읽음
                 response.put("success", false);
-                return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
             String jwt = jwtUtils.makeJwtToken(email);
@@ -75,7 +75,7 @@ public class AuthController {
                 response.put("success", true);
                 response.put("jwt", jwt);
                 response.put("user", emailUser);
-                return new ResponseEntity(response, HttpStatus.OK);
+                return new ResponseEntity<>(response, HttpStatus.OK);
             }
             else {      //처음 OttU를 사용한 클라이언트
                 User newUser = new User();
@@ -85,7 +85,7 @@ public class AuthController {
                 response.put("success", true);
                 response.put("jwt", jwt);
                 response.put("user", joinUser);
-                return new ResponseEntity(response, HttpStatus.CREATED);
+                return new ResponseEntity<>(response, HttpStatus.CREATED);
             }
         }
         //헤더에 jwt값을 준 경우(클라이언트의 자동로그인)
@@ -98,11 +98,11 @@ public class AuthController {
             if (emailUser.isPresent()) {    //로그인을 해본 클라이언트(-> email이 DB에 포함됨)
                 response.put("success", true);
                 response.put("user", emailUser);
-                return new ResponseEntity(response, HttpStatus.OK);
+                return new ResponseEntity<>(response, HttpStatus.OK);
             }
             else {      //처음 OttU를 사용한 클라이언트
                 response.put("success", false);
-                return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
             }
         }
     }
