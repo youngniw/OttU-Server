@@ -198,6 +198,11 @@ public class RecruitController {
             else
                 response.put("timeout", true);
 
+            if (recruit.getIsTeam())
+                response.put("isTeam", true);
+            else
+                response.put("isTeam", false);
+
             response.put("waitlist", recruitWaitlist);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {

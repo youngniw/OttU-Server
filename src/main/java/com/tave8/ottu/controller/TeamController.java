@@ -58,6 +58,10 @@ public class TeamController {
                 response.put("timeout", true);
                 return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
             }
+            else if (ottTeamDTO.getPaymentDay()<1 || ottTeamDTO.getPaymentDay()>30) {
+                response.put("success", false);
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
 
             List<Waitlist> recruitAcceptedWaitlist = recruitService.findAcceptedWaitlist(ottTeamDTO.getRecruitIdx());
 
