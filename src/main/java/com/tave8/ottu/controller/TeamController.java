@@ -159,6 +159,7 @@ public class TeamController {
                 }
 
                 response.put("success", true);
+                response.put("platform", team.get().getPlatform());
                 response.put("userlist", simpleUserList);
                 return new ResponseEntity(response, HttpStatus.OK);
             }
