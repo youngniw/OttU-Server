@@ -5,19 +5,20 @@ import com.tave8.ottu.repository.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class CommentService {
+    private final CommentRepository commentRepository;
+
     @Autowired
-    private CommentRepository commentRepository;
+    public CommentService(CommentRepository commentRepository) {
+        this.commentRepository = commentRepository;
+    }
 
     // 댓글 가져오기
     public List<Comment> getCommentList(Long postIdx) {
-        List<Comment> commentList = commentRepository.findAllByPostIdx(postIdx);
-
-        return commentList;
+        return commentRepository.findAllByPostIdx(postIdx);
     }
 
     public Comment getCommentById(Long commentIdx) {

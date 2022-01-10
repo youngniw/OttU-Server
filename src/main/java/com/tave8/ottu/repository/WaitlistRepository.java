@@ -18,6 +18,8 @@ public interface WaitlistRepository extends JpaRepository<Waitlist, Long> {
 
     Long countAllByRecruit_RecruitIdxAndIsAcceptedTrue(Long recruitIdx);                            //모집글의 참여자 중 선택된 참여자의 수를 반환함
 
+    Long countWaitlistByRecruit_RecruitIdxAndUser_UserIdx(Long recruitIdx, Long userIdx);           //해당 회원이 대기자에 속해있는지 확인 가능(0이면 속함x)
+
     @Query("DELETE FROM Waitlist w WHERE w.recruit.recruitIdx = :recruitIdx AND w.isAccepted = false")
     void deleteAllByRecruitIdxAndIsAcceptedFalse(@Param("recruitIdx") Long recruitIdx);             //해당 모집글의 참여자 중 수락되지 않은 참여자 목록 삭제
 }

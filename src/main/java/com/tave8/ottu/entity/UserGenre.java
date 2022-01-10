@@ -18,9 +18,4 @@ public class UserGenre {
 
     @Column(name="genre_idx")
     private int genreIdx;
-
-    public UserGenre(Long userIdx, int genreIdx) {
-        this.userIdx = userIdx;
-        this.genreIdx = genreIdx;
-    }
 }

@@ -14,6 +14,7 @@ import com.tave8.ottu.service.CommentService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/community")
@@ -27,7 +28,7 @@ public class CommunityCommentController {
 
     //댓글 작성
     @PostMapping("/comment/upload")
-    private ResponseEntity writeComment(@RequestBody CommentDTO commentDTO){
+    private ResponseEntity<Map<String, Object>> writeComment(@RequestBody CommentDTO commentDTO){
         HashMap<String,Object> response = new HashMap<>();
         try{
             Comment comment = new Comment();
@@ -47,32 +48,32 @@ public class CommunityCommentController {
             commentService.save(comment);
 
             response.put("success",true);
-            return new ResponseEntity(response, HttpStatus.CREATED);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
         }
         catch (Exception e){
             response.put("success",false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     // 댓글 삭제
     @DeleteMapping("/comment/{ccid}")   //commentIdx
-    public ResponseEntity deleteComment(@PathVariable("ccid") Long commentIdx){
+    public ResponseEntity<Map<String, Object>> deleteComment(@PathVariable("ccid") Long commentIdx){
         HashMap<String, Object> response = new HashMap<>();
         try {
             Comment comment = commentService.getCommentById(commentIdx);
             comment.setIsDeleted(true);
             if (commentService.saveCommentIsDeleted(comment)) {
                 response.put("success", true);
-                return new ResponseEntity(response, HttpStatus.OK);
+                return new ResponseEntity<>(response, HttpStatus.OK);
             }
             else {
                 response.put("success", false);
-                return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } catch (Exception e) {
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

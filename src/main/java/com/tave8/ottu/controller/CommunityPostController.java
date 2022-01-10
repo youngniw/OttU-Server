@@ -13,11 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/community/post")
@@ -32,23 +29,23 @@ public class CommunityPostController {
     }
 
     @GetMapping("/current")
-    public ResponseEntity getCurrentPostList() {
+    public ResponseEntity<Map<String, Object>> getCurrentPostList() {
         HashMap<String, Object> response = new HashMap<>();
         try{
             List<SimplePostDTO> currentPostList = postService.findCurrentPlatformPost();
 
             response.put("success", true);
             response.put("postlist", currentPostList);
-            return new ResponseEntity(response,HttpStatus.OK);
+            return new ResponseEntity<>(response,HttpStatus.OK);
         }
         catch (Exception e){
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/{pid}/list")
-    public ResponseEntity getPostList(@PathVariable("pid") int platformIdx){
+    public ResponseEntity<Map<String, Object>> getPostList(@PathVariable("pid") int platformIdx){
         HashMap<String, Object> response = new HashMap<>();
         try{
             List<Post> postList = postService.findAllByPlatform(platformIdx);
@@ -56,16 +53,16 @@ public class CommunityPostController {
 
             response.put("success", true);
             response.put("postlist", postList);
-            return new ResponseEntity(response,HttpStatus.OK);
+            return new ResponseEntity<>(response,HttpStatus.OK);
         }
         catch (Exception e){
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/{cpid}")
-    public ResponseEntity getPostAndCommentList(@PathVariable("cpid") Long postIdx) {
+    public ResponseEntity<Map<String, Object>> getPostAndCommentList(@PathVariable("cpid") Long postIdx) {
         HashMap<String, Object> response = new HashMap<>();
         try{
             List<Comment> commentList = new ArrayList<>();
@@ -73,23 +70,23 @@ public class CommunityPostController {
             Optional<Post> post = postService.findById(postIdx);
             if (post.isPresent()) {
                 commentList = commentService.getCommentList(postIdx);
-                post.get().setCommentNum(Long.valueOf(commentList.size()));     //댓글 수 저장
+                post.get().setCommentNum((long) commentList.size());     //댓글 수 저장
             }
 
             response.put("success", true);
             response.put("post", post);
             response.put("commentlist", commentList);
-            return new ResponseEntity(response, HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         catch (Exception e){
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     // 글 작성
     @PostMapping("/upload")
-    public ResponseEntity postUpload(@RequestBody PostDTO postDTO){
+    public ResponseEntity<Map<String, Object>> postUpload(@RequestBody PostDTO postDTO){
         HashMap<String,Object> response = new HashMap<>();
         try {
             Post post = new Post();
@@ -106,17 +103,17 @@ public class CommunityPostController {
             postService.save(post);
 
             response.put("success",true);
-            return new ResponseEntity(response, HttpStatus.CREATED);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
         }
         catch (Exception e) {
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     // 글 수정
     @PatchMapping("/{cpid}")
-    public ResponseEntity editPost(@PathVariable("cpid") Long postIdx, @RequestBody PostDTO postDTO){
+    public ResponseEntity<Map<String, Object>> editPost(@PathVariable("cpid") Long postIdx, @RequestBody PostDTO postDTO){
         HashMap<String,Object> response = new HashMap<>();
         try {
             //Post 가져오기
@@ -128,38 +125,38 @@ public class CommunityPostController {
                 postService.save(post);     //DB에 수정값 넣어주기
 
                 response.put("success", true);
-                return new ResponseEntity(response,HttpStatus.OK);
+                return new ResponseEntity<>(response,HttpStatus.OK);
             }
             else {
                 response.put("success", false);
-                return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
             }
         }
         catch (Exception e){
             response.put("success", false);
-            return new ResponseEntity(response,HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     // 글 삭제
     @DeleteMapping("/{cpid}")
-    public ResponseEntity deletePost(@PathVariable("cpid") Long postIdx){
+    public ResponseEntity<Map<String, Object>> deletePost(@PathVariable("cpid") Long postIdx){
         HashMap<String, Object> response = new HashMap<>();
         try{
             Post post = postService.getById(postIdx);
             post.setIsDeleted(true);
             if (postService.save(post)) {
                 response.put("success", true);
-                return new ResponseEntity(response,HttpStatus.OK);
+                return new ResponseEntity<>(response,HttpStatus.OK);
             }
             else {
                 response.put("success", false);
-                return new ResponseEntity(response,HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(response,HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
         catch (Exception e){
             response.put("success", false);
-            return new ResponseEntity(response,HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

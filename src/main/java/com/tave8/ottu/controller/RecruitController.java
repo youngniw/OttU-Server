@@ -27,8 +27,8 @@ public class RecruitController {
     }
 
     //모집글들 받아오기
-    @GetMapping("/{pid}/list")
-    public ResponseEntity getRecruitList(@PathVariable("pid") int platformIdx, @RequestParam(value = "headcount", required = false) Integer headcount) {
+    @GetMapping("/{pid}/list/{uid}")
+    public ResponseEntity<Map<String, Object>> getRecruitList(@PathVariable("pid") int platformIdx, @PathVariable("uid") Long userIdx, @RequestParam(value = "headcount", required = false) Integer headcount) {
         HashMap<String, Object> response = new HashMap<>();
         try {
             List<Recruit> recruitList;
@@ -36,20 +36,23 @@ public class RecruitController {
                 recruitList = recruitService.findAllByPlatform(platformIdx);
             else
                 recruitList = recruitService.findAllByPlatformAndHeadcount(platformIdx, headcount);
-            recruitList.forEach(recruit -> recruit.setChoiceNum(recruitService.findRecruitChoiceNum(recruit.getRecruitIdx())));     //현재 수락된 참여자 수 저장
+            recruitList.forEach(recruit -> {
+                recruit.setChoiceNum(recruitService.findRecruitChoiceNum(recruit.getRecruitIdx()));                 //현재 수락된 참여자 수 저장
+                recruit.setIsApplying(recruitService.findByUserApplyingRecruit(recruit.getRecruitIdx(), userIdx));  //회원이 참여요청 했는 지 확인 가능
+            });
 
             response.put("success", true);
             response.put("recruitlist", recruitList);
-            return new ResponseEntity(response, HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     //모집글 작성하기
     @PostMapping("/upload")
-    public ResponseEntity postUploadRecruit(@RequestBody RecruitDTO recruitDTO) {
+    public ResponseEntity<Map<String, Object>> postUploadRecruit(@RequestBody RecruitDTO recruitDTO) {
         HashMap<String, Object> response = new HashMap<>();
         try {
             Recruit recruit = new Recruit();
@@ -70,79 +73,81 @@ public class RecruitController {
             recruitService.upload(recruit);
 
             response.put("success", true);
-            return new ResponseEntity(response, HttpStatus.CREATED);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
         } catch (Exception e) {
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     //모집글 정보 받아오기(사용 x)
     @GetMapping("/{rid}")
-    public ResponseEntity getRecruit(@PathVariable("rid") Long recruitIdx) {
+    public ResponseEntity<Map<String, Object>> getRecruit(@PathVariable("rid") Long recruitIdx) {
         HashMap<String, Object> response = new HashMap<>();
         try {
             Optional<Recruit> recruit = recruitService.findRecruitById(recruitIdx);
             response.put("success", true);
             response.put("recruit", recruit);
-            return new ResponseEntity(response, HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     //모집글 삭제하기
     @DeleteMapping("/{rid}")
-    public ResponseEntity deleteRecruit(@PathVariable("rid") Long recruitIdx) {
+    public ResponseEntity<Map<String, Object>> deleteRecruit(@PathVariable("rid") Long recruitIdx) {
         HashMap<String, Object> response = new HashMap<>();
         try {
             if (recruitService.deleteRecruitById(recruitIdx)) {
                 response.put("success", true);
-                return new ResponseEntity(response, HttpStatus.OK);
+                return new ResponseEntity<>(response, HttpStatus.OK);
             }
             else {
                 response.put("success", false);
-                return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } catch (Exception e) {
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     //모집글 참여하기
     @PostMapping("/participate")
-    public ResponseEntity postParticipate(@RequestBody Map<String, Long> requestBody) {
+    public ResponseEntity<Map<String, Object>> postParticipate(@RequestBody Map<String, Long> requestBody) {
         HashMap<String, Object> response = new HashMap<>();
         try {
-            Optional<Recruit> recruit = recruitService.findRecruitById(requestBody.get("recruitIdx"));
-            if (!recruit.get().getIsCompleted()) {
+            Long recruitIdx = requestBody.get("recruitIdx");
+            Long userIdx = requestBody.get("userIdx");
+            Optional<Recruit> recruit = recruitService.findRecruitById(recruitIdx);
+            if (!recruit.get().getIsCompleted() || !recruitService.findByUserApplyingRecruit(recruitIdx, userIdx)) {
                 Waitlist waiting = new Waitlist();
                 waiting.setRecruit(recruit.get());
 
                 User user = new User();
-                user.setUserIdx(requestBody.get("userIdx"));
+                user.setUserIdx(userIdx);
                 waiting.setUser(user);
 
                 boolean participate = recruitService.participate(waiting);
 
                 if (participate) {
                     response.put("success", true);
-                    return new ResponseEntity(response, HttpStatus.OK);
+                    return new ResponseEntity<>(response, HttpStatus.OK);
                 }
             }
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     //모집 확정 - 팀원 정보 전달
     @GetMapping("/{rid}/members")
-    public ResponseEntity getRecruitMembers(@PathVariable("rid") Long recruitIdx) {
+    public ResponseEntity<Map<String, Object>> getRecruitMembers(@PathVariable("rid") Long recruitIdx) {
         HashMap<String, Object> response = new HashMap<>();
         try {
             Recruit recruit = recruitService.getRecruitById(recruitIdx);
@@ -159,26 +164,26 @@ public class RecruitController {
                 if (success) {
                     response.put("success", true);
                     response.put("members", recruitAcceptedWaitlist);
-                    return new ResponseEntity(response, HttpStatus.OK);
+                    return new ResponseEntity<>(response, HttpStatus.OK);
                 }
                 else {
                     response.put("success", false);
-                    return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+                    return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
                 }
             }
             else {
                 response.put("success", false);
-                return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     //모집글 참여자 정보 받아오기
     @GetMapping("/{rid}/waitlist")
-    public ResponseEntity getRecruitWaitlist(@PathVariable("rid") Long recruitIdx) {
+    public ResponseEntity<Map<String, Object>> getRecruitWaitlist(@PathVariable("rid") Long recruitIdx) {
         HashMap<String, Object> response = new HashMap<>();
         try {
             Recruit recruit = recruitService.getRecruitById(recruitIdx);
@@ -193,73 +198,78 @@ public class RecruitController {
             else
                 response.put("timeout", true);
 
+            if (recruit.getIsTeam())
+                response.put("isTeam", true);
+            else
+                response.put("isTeam", false);
+
             response.put("waitlist", recruitWaitlist);
-            return new ResponseEntity(response, HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     //모집글 참여자 수락
     @PatchMapping("/waitlist/accept")
-    public ResponseEntity patchWaitlistAccept(@RequestBody Map<String, Long> requestBody) {
+    public ResponseEntity<Map<String, Object>> patchWaitlistAccept(@RequestBody Map<String, Long> requestBody) {
         HashMap<String, Object> response = new HashMap<>();
         try {
             Waitlist waiting = recruitService.getWaitlistById(requestBody.get("waitlistIdx"));
             Recruit recruit = waiting.getRecruit();
             if (recruit.getIsCompleted()) {                 //이미 모집이 확정되었다면 수락이 더이상 되지 않음
                 response.put("success", false);
-                return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
             }
             else if (Long.valueOf(recruit.getHeadcount()).equals(recruitService.findRecruitChoiceNum(recruit.getRecruitIdx()))) {    //이미 정원이 참
                 response.put("success", false);
-                return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
             }
             else {      //수락 가능
                 waiting.setIsAccepted(true);
                 boolean success = recruitService.saveWaitlistIsAccepted(waiting);
                 if (success) {
                     response.put("success", true);
-                    return new ResponseEntity(response, HttpStatus.OK);
+                    return new ResponseEntity<>(response, HttpStatus.OK);
                 }
                 else {
                     response.put("success", false);
-                    return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+                    return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
                 }
             }
         } catch (Exception e) {
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     //모집글 참여자 수락 취소
     @PatchMapping("/waitlist/cancel")
-    public ResponseEntity patchWaitlistCancel(@RequestBody Map<String, Long> requestBody) {
+    public ResponseEntity<Map<String, Object>> patchWaitlistCancel(@RequestBody Map<String, Long> requestBody) {
         HashMap<String, Object> response = new HashMap<>();
         try {
             Waitlist waiting = recruitService.getWaitlistById(requestBody.get("waitlistIdx"));
 
             if (waiting.getRecruit().getIsCompleted()) {    //이미 모집이 확정되었다면 수락취소가 더이상 되지 않음
                 response.put("success", false);
-                return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
             }
             else {
                 waiting.setIsAccepted(false);
                 boolean success = recruitService.saveWaitlistIsAccepted(waiting);
                 if (success) {
                     response.put("success", true);
-                    return new ResponseEntity(response, HttpStatus.OK);
+                    return new ResponseEntity<>(response, HttpStatus.OK);
                 }
                 else {
                     response.put("success", false);
-                    return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+                    return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
                 }
             }
         } catch (Exception e) {
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

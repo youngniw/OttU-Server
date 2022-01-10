@@ -34,8 +34,7 @@ public class PostService {
 
     //플랫폼 id로 Post글 가져오기
     public List<Post> findAllByPlatform(int platformIdx) {
-        List<Post> postList = postRepository.findAllByPlatformIdx(platformIdx);
-        return postList;
+        return postRepository.findAllByPlatformIdx(platformIdx);
     }
 
     public List<SimplePostDTO> findCurrentPlatformPost() {

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class MypageController {
@@ -29,7 +30,7 @@ public class MypageController {
 
     //내가 쓴 모집글들 받아오기
     @GetMapping("/user/{uid}/recruit")
-    public ResponseEntity getUserRecruitList(@PathVariable("uid") Long userIdx) {
+    public ResponseEntity<Map<String, Object>> getUserRecruitList(@PathVariable("uid") Long userIdx) {
         HashMap<String, Object> response = new HashMap<>();
         try {
             List<Recruit> recruitList = recruitService.findAllByWriter(userIdx);
@@ -37,16 +38,16 @@ public class MypageController {
 
             response.put("success", true);
             response.put("recruitlist", recruitList);
-            return new ResponseEntity(response, HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     //내가 쓴 게시글 조회
     @GetMapping("/user/{uid}/post")
-    public ResponseEntity getMyPostList(@PathVariable("uid") Long userIdx){
+    public ResponseEntity<Map<String, Object>> getMyPostList(@PathVariable("uid") Long userIdx){
         HashMap<String,Object> response = new HashMap<>();
         try{
             List<Post> myPostList = postService.findAllByUserIdx(userIdx);
@@ -54,33 +55,33 @@ public class MypageController {
 
             response.put("success",true);
             response.put("postlist", myPostList);
-            return new ResponseEntity(response, HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         catch (Exception e){
             response.put("success",false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     //나의 OTT 불러오기
     @GetMapping("/user/{uid}/ott")
-    public ResponseEntity getUserOttList(@PathVariable("uid") Long userIdx) {
+    public ResponseEntity<Map<String, Object>> getUserOttList(@PathVariable("uid") Long userIdx) {
         HashMap<String, Object> response = new HashMap<>();
         try {
             List<Team> ottList = teamService.findAllTeamsByUser(userIdx);
 
             response.put("success", true);
             response.put("ottlist", ottList);
-            return new ResponseEntity(response, HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     //2주내 결제 예정인 나의 OTT 불러오기
     @GetMapping("/user/{uid}/urgent-ott")
-    public ResponseEntity getUserUrgentOttList(@PathVariable("uid") Long userIdx) {
+    public ResponseEntity<Map<String, Object>> getUserUrgentOttList(@PathVariable("uid") Long userIdx) {
         HashMap<String, Object> response = new HashMap<>();
         try {
             List<Team> ottList = teamService.findAllTeamsByUser(userIdx);
@@ -102,16 +103,16 @@ public class MypageController {
             else {
                 response.put("ottlist", ottList);
             }
-            return new ResponseEntity(response, HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     //나의 OTT 추가하기(=팀 추가)
     @PostMapping("/user/ott")
-    public ResponseEntity postUploadRecruit(@RequestBody OttDTO ottDTO) {
+    public ResponseEntity<Map<String, Object>> postUploadRecruit(@RequestBody OttDTO ottDTO) {
         HashMap<String, Object> response = new HashMap<>();
         try {
             Team team = new Team();
@@ -135,10 +136,10 @@ public class MypageController {
             teamService.saveUserTeam(userTeam);
 
             response.put("success", true);
-            return new ResponseEntity(response, HttpStatus.CREATED);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
         } catch (Exception e) {
             response.put("success", false);
-            return new ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
