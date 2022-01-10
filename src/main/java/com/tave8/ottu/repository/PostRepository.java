@@ -24,7 +24,7 @@ public interface PostRepository extends JpaRepository <Post,Long> {
             "group by platform_idx" +
             ")" +
             ") currentpost " +
-            "order by created_date desc;", nativeQuery = true)
+            "order by platform_idx asc;", nativeQuery = true)
     List<Post> findByCreatedDate();     //각 플랫폼 마다의 최신글을 받아옴
 
     @Query("SELECT p FROM Post p WHERE p.writer.userIdx = :userIdx ORDER BY p.createdDate DESC")
