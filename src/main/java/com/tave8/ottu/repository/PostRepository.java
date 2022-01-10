@@ -20,7 +20,7 @@ public interface PostRepository extends JpaRepository <Post,Long> {
             "where (platform_idx, post_idx) in ( " +
             "select platform_idx, post_idx " +
             "from communitypost " +
-            "where (platform_idx, created_date) in (select platform_idx, max(created_date) as created_date from communitypost group by platform_idx) " +
+            "where (platform_idx, created_date) in (select platform_idx, max(created_date) as created_date from communitypost where is_deleted=false group by platform_idx) " +
             "group by platform_idx" +
             ")" +
             ") currentpost " +
