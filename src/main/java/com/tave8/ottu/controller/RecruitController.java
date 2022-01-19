@@ -5,12 +5,15 @@ import com.tave8.ottu.entity.Platform;
 import com.tave8.ottu.entity.Recruit;
 import com.tave8.ottu.entity.User;
 import com.tave8.ottu.entity.Waitlist;
+import com.tave8.ottu.jwt.JwtUtils;
 import com.tave8.ottu.service.RecruitService;
+import com.tave8.ottu.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
@@ -20,25 +23,37 @@ import java.util.*;
 @RequestMapping(value = "/recruit")
 public class RecruitController {
     private final RecruitService recruitService;
+    private final UserService userService;
+    private final JwtUtils jwtUtils;
 
     @Autowired
-    public RecruitController(RecruitService recruitService) {
+    public RecruitController(RecruitService recruitService, UserService userService, JwtUtils jwtUtils) {
         this.recruitService = recruitService;
+        this.userService = userService;
+        this.jwtUtils = jwtUtils;
     }
 
-    //모집글들 받아오기
-    @GetMapping("/{pid}/list/{uid}")
-    public ResponseEntity<Map<String, Object>> getRecruitList(@PathVariable("pid") int platformIdx, @PathVariable("uid") Long userIdx, @RequestParam(value = "headcount", required = false) Integer headcount) {
+    //모집글 목록 조회
+    @GetMapping("/list")
+    public ResponseEntity<Map<String, Object>> getRecruitList(HttpServletRequest request, @RequestParam("pid") int platformIdx, @RequestParam(value = "headcount", required = false) Integer headcount, @RequestParam(value = "completed", required = false) Boolean completed) {
         HashMap<String, Object> response = new HashMap<>();
         try {
+            String email = (String) jwtUtils.getClaims(request.getHeader("authorization")).get("email");
+            Optional<User> emailUser = userService.findUserEmail(email);
+
             List<Recruit> recruitList;
-            if (headcount == null)
-                recruitList = recruitService.findAllByPlatform(platformIdx);
-            else
+            if (headcount != null && completed != null)
+                recruitList = recruitService.findAllByPlatformAndHeadcountAndIsCompleted(platformIdx, headcount, completed);
+            else if (headcount != null)
                 recruitList = recruitService.findAllByPlatformAndHeadcount(platformIdx, headcount);
+            else if (completed != null)
+                recruitList = recruitService.findAllByPlatformAndIsCompleted(platformIdx, completed);
+            else
+                recruitList = recruitService.findAllByPlatform(platformIdx);    //필터 없이 전체 모집글 반환
+
             recruitList.forEach(recruit -> {
                 recruit.setChoiceNum(recruitService.findRecruitChoiceNum(recruit.getRecruitIdx()));                 //현재 수락된 참여자 수 저장
-                recruit.setIsApplying(recruitService.findByUserApplyingRecruit(recruit.getRecruitIdx(), userIdx));  //회원이 참여요청 했는 지 확인 가능
+                recruit.setIsApplying(recruitService.findByUserApplyingRecruit(recruit.getRecruitIdx(), emailUser.get().getUserIdx()));  //회원이 참여요청 했는 지 확인 가능
             });
 
             response.put("success", true);
@@ -50,8 +65,8 @@ public class RecruitController {
         }
     }
 
-    //모집글 작성하기
-    @PostMapping("/upload")
+    //모집글 추가
+    @PostMapping
     public ResponseEntity<Map<String, Object>> postUploadRecruit(@RequestBody RecruitDTO recruitDTO) {
         HashMap<String, Object> response = new HashMap<>();
         try {
@@ -80,7 +95,7 @@ public class RecruitController {
         }
     }
 
-    //모집글 정보 받아오기(사용 x)
+    //모집글 정보 조회
     @GetMapping("/{rid}")
     public ResponseEntity<Map<String, Object>> getRecruit(@PathVariable("rid") Long recruitIdx) {
         HashMap<String, Object> response = new HashMap<>();
@@ -95,18 +110,28 @@ public class RecruitController {
         }
     }
 
-    //모집글 삭제하기
+    //모집글 삭제
     @DeleteMapping("/{rid}")
-    public ResponseEntity<Map<String, Object>> deleteRecruit(@PathVariable("rid") Long recruitIdx) {
+    public ResponseEntity<Map<String, Object>> deleteRecruit(HttpServletRequest request, @PathVariable("rid") Long recruitIdx) {
         HashMap<String, Object> response = new HashMap<>();
         try {
-            if (recruitService.deleteRecruitById(recruitIdx)) {
-                response.put("success", true);
-                return new ResponseEntity<>(response, HttpStatus.OK);
+            String email = (String) jwtUtils.getClaims(request.getHeader("authorization")).get("email");
+            Optional<User> emailUser = userService.findUserEmail(email);
+            Optional<Recruit> recruit = recruitService.findRecruitById(recruitIdx);
+
+            if (emailUser.isPresent() && recruit.isPresent() && emailUser.get().getUserIdx().equals(recruit.get().getWriter().getUserIdx())) {
+                if (recruitService.deleteRecruitById(recruitIdx)) {
+                    response.put("success", true);
+                    return new ResponseEntity<>(response, HttpStatus.OK);
+                }
+                else {
+                    response.put("success", false);
+                    return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+                }
             }
             else {
                 response.put("success", false);
-                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {
             response.put("success", false);
@@ -114,7 +139,7 @@ public class RecruitController {
         }
     }
 
-    //모집글 참여하기
+    //모집글 참여
     @PostMapping("/participate")
     public ResponseEntity<Map<String, Object>> postParticipate(@RequestBody Map<String, Long> requestBody) {
         HashMap<String, Object> response = new HashMap<>();
@@ -181,7 +206,7 @@ public class RecruitController {
         }
     }
 
-    //모집글 참여자 정보 받아오기
+    //모집글 참여자 정보 조회
     @GetMapping("/{rid}/waitlist")
     public ResponseEntity<Map<String, Object>> getRecruitWaitlist(@PathVariable("rid") Long recruitIdx) {
         HashMap<String, Object> response = new HashMap<>();
