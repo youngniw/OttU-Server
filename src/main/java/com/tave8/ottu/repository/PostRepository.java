@@ -9,8 +9,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface PostRepository extends JpaRepository <Post,Long> {
-    @Query("SELECT p FROM Post p WHERE p.platform.platformIdx = :platformIdx AND p.isDeleted = false ORDER BY p.createdDate DESC")
+public interface PostRepository extends JpaRepository <Post, Long> {
+    @Query("SELECT p FROM Post p WHERE p.platform.platformIdx = :platformIdx AND p.isDeleted = false ORDER BY p.createdDate DESC, p.postIdx DESC")
     List<Post> findAllByPlatformIdx(@Param("platformIdx") int platformIdx);
 
     //각 플랫폼 마다의 최신글을 받아옴-> 동일 시간이 있다면 post_idx가 높은 것이 조회됨
