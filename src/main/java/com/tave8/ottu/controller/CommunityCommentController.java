@@ -1,5 +1,7 @@
 package com.tave8.ottu.controller;
 import com.tave8.ottu.entity.Comment;
+import com.tave8.ottu.jwt.JwtUtils;
+import com.tave8.ottu.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,21 +15,27 @@ import com.tave8.ottu.entity.User;
 import com.tave8.ottu.service.CommentService;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
-@RequestMapping(value = "/community")
+@RequestMapping(value = "/community/comment")
 public class CommunityCommentController {
     private final CommentService commentService;
+    private final UserService userService;
+    private final JwtUtils jwtUtils;
 
     @Autowired
-    public CommunityCommentController(CommentService commentService) {
+    public CommunityCommentController(CommentService commentService, UserService userService, JwtUtils jwtUtils) {
         this.commentService = commentService;
+        this.userService = userService;
+        this.jwtUtils = jwtUtils;
     }
 
     //댓글 작성
-    @PostMapping("/comment/upload")
+    @PostMapping
     private ResponseEntity<Map<String, Object>> writeComment(@RequestBody CommentDTO commentDTO){
         HashMap<String,Object> response = new HashMap<>();
         try{
@@ -57,19 +65,28 @@ public class CommunityCommentController {
     }
 
     // 댓글 삭제
-    @DeleteMapping("/comment/{ccid}")   //commentIdx
-    public ResponseEntity<Map<String, Object>> deleteComment(@PathVariable("ccid") Long commentIdx){
+    @DeleteMapping("/{ccid}")   //commentIdx
+    public ResponseEntity<Map<String, Object>> deleteComment(HttpServletRequest request, @PathVariable("ccid") Long commentIdx){
         HashMap<String, Object> response = new HashMap<>();
         try {
-            Comment comment = commentService.getCommentById(commentIdx);
-            comment.setIsDeleted(true);
-            if (commentService.saveCommentIsDeleted(comment)) {
-                response.put("success", true);
-                return new ResponseEntity<>(response, HttpStatus.OK);
+            String email = (String) jwtUtils.getClaims(request.getHeader("authorization")).get("email");
+            Optional<User> user = userService.findUserEmail(email);
+            Optional<Comment> comment = commentService.findCommentById(commentIdx);
+
+            if (user.isPresent() && comment.isPresent() && user.get().getUserIdx().equals(comment.get().getWriter().getUserIdx())) {
+                comment.get().setIsDeleted(true);
+                if (commentService.saveCommentIsDeleted(comment.get())) {
+                    response.put("success", true);
+                    return new ResponseEntity<>(response, HttpStatus.OK);
+                }
+                else {
+                    response.put("success", false);
+                    return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+                }
             }
             else {
                 response.put("success", false);
-                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {
             response.put("success", false);

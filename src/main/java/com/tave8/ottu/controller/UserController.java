@@ -3,54 +3,69 @@ package com.tave8.ottu.controller;
 import com.tave8.ottu.dto.UserDTO;
 import com.tave8.ottu.entity.Genre;
 import com.tave8.ottu.entity.User;
+import com.tave8.ottu.jwt.JwtUtils;
 import com.tave8.ottu.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 @RestController
 @RequestMapping(value = "/user")
 public class UserController {
     private final UserService userService;
+    private final JwtUtils jwtUtils;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, JwtUtils jwtUtils) {
         this.userService = userService;
+        this.jwtUtils = jwtUtils;
     }
 
 
+    //사용자 정보 수정
     @PatchMapping("/{uid}")
-    public ResponseEntity<Map<String, Object>> joinUser(@PathVariable("uid") Long userIdx, @RequestBody UserDTO userDTO){
+    public ResponseEntity<Map<String, Object>> joinUser(HttpServletRequest request, @PathVariable("uid") Long userIdx, @RequestBody UserDTO userDTO){
         HashMap<String, Object> response = new HashMap<>();
         try {
-            // userDTO에서 받은 userIdx로 user찾기
-            User user = userService.findUserById(userIdx).orElse(null);
+            //접근 사용자 조회
+            String email = (String) jwtUtils.getClaims(request.getHeader("authorization")).get("email");
+            Optional<User> user = userService.findUserEmail(email);
 
-            if (userDTO.getKakaotalkId() != null) {
-                user.setKakaotalkId(userDTO.getKakaotalkId());
-            }
+            if (user.isPresent() && user.get().getUserIdx().equals(userIdx)) {
+                User changeUser = user.get();
 
-            if (userDTO.getNickname() != null) {
-                user.setNickname(userDTO.getNickname());
-            }
-
-            if (userDTO.getGenres() != null) {
-                List<Integer> genreList = userDTO.getGenres();
-                List<Genre> genres = new ArrayList<>();
-                for (int genre : genreList) {
-                    Genre your_genre = userService.findGenreByGenreIdx(genre);
-                    genres.add(your_genre);
+                if (userDTO.getKakaotalkId() != null) {
+                    changeUser.setKakaotalkId(userDTO.getKakaotalkId());
                 }
-                user.setGenres(genres);
+
+                if (userDTO.getNickname() != null) {
+                    changeUser.setNickname(userDTO.getNickname());
+                }
+
+                if (userDTO.getGenres() != null) {
+                    List<Integer> genreList = userDTO.getGenres();
+                    List<Genre> genres = new ArrayList<>();
+                    for (int genre : genreList) {
+                        Genre your_genre = userService.findGenreByGenreIdx(genre);
+                        genres.add(your_genre);
+                    }
+                    changeUser.setGenres(genres);
+                }
+
+                userService.updateUser(changeUser);
+
+                response.put("success",true);
+                return new ResponseEntity<>(response,HttpStatus.OK);
             }
 
-            userService.updateUser(user);
-
-            response.put("success",true);
-            return new ResponseEntity<>(response,HttpStatus.OK);
+            else {
+                response.put("success", false);
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
         }
         catch (Exception e){
             response.put("success",false);
@@ -58,6 +73,7 @@ public class UserController {
         }
     }
 
+    //앱 푸시 알림을 위한 토큰 저장
     @PatchMapping("/{uid}/notice-token")
     public ResponseEntity<Map<String, Object>> patchUserNoticeToken(@PathVariable("uid") Long userIdx, @RequestBody Map<String, String> requestBody) {
         HashMap<String, Object> response = new HashMap<>();     //안드로이드에서 사용되는 noticeToken
@@ -85,8 +101,9 @@ public class UserController {
         }
     }
 
+    //사용자 정보 조회
     @GetMapping("/{uid}")
-    public ResponseEntity<Map<String, Object>> getUser(@PathVariable("uid") Long userIdx) {      //유저 정보 전달
+    public ResponseEntity<Map<String, Object>> getUser(@PathVariable("uid") Long userIdx) {
         Optional<User> user = userService.findUserById(userIdx);
 
         HashMap<String, Object> response = new HashMap<>();
@@ -118,7 +135,6 @@ public class UserController {
 
     @DeleteMapping("/{uid}")
     public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable("uid") Long userIdx){
-
         HashMap<String,Object> response = new HashMap<>();
 
         try{

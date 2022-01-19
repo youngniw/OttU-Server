@@ -31,6 +31,14 @@ public class RecruitService {
         return recruitRepository.findAllByPlatformAndHeadcount(platformIdx, headcount);
     }
 
+    public List<Recruit> findAllByPlatformAndIsCompleted(int platformIdx, boolean isCompleted) {
+        return recruitRepository.findAllByPlatformAndIsCompleted(platformIdx, isCompleted);
+    }
+
+    public List<Recruit> findAllByPlatformAndHeadcountAndIsCompleted(int platformIdx, int headcount, boolean isCompleted) {
+        return recruitRepository.findAllByPlatformAndHeadcountAndIsCompleted(platformIdx, headcount, isCompleted);
+    }
+
     public List<Recruit> findAllByWriter(Long writerIdx) {
         return recruitRepository.findAllByWriterIdx(writerIdx);
     }

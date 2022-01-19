@@ -35,7 +35,6 @@ public class AuthController {
         //access_token으로 카카오 로그인함
         if (requestBody != null) {
             String accessToken = requestBody.get("access_token");
-            System.out.println("accessToken = " + accessToken);
 
             RestTemplate restTemplate = new RestTemplate();  //POST방식으로 데이터를 요청 (카카오 쪽으로)
 

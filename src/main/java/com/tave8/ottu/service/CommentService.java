@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CommentService {
@@ -21,9 +22,10 @@ public class CommentService {
         return commentRepository.findAllByPostIdx(postIdx);
     }
 
-    public Comment getCommentById(Long commentIdx) {
-        return commentRepository.getById(commentIdx);
+    public Optional<Comment> findCommentById(Long commentIdx) {
+        return commentRepository.findById(commentIdx);
     }
+
 
     // 작성글 저장
     public boolean save(Comment comment) {
