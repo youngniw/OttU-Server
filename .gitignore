@@ -25,6 +25,8 @@ bin/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+src/main/resources/ottu_firebase_service_key.json
+src/main/resources/application.properties
 
 ### NetBeans ###
 /nbproject/private/
