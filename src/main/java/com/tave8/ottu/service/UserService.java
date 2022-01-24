@@ -1,6 +1,10 @@
 package com.tave8.ottu.service;
 
+import com.tave8.ottu.entity.Evaluation;
+import com.tave8.ottu.entity.Genre;
 import com.tave8.ottu.entity.User;
+import com.tave8.ottu.repository.EvaluationRepository;
+import com.tave8.ottu.repository.GenreRepository;
 import com.tave8.ottu.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,11 +15,23 @@ import java.util.Optional;
 @Service
 @Transactional
 public class UserService {
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final GenreRepository genreRepository;
+    private final EvaluationRepository evaluationRepository;
 
-    public Optional<User> findUser(Long userId) {
-        return userRepository.findById(userId);
+    @Autowired
+    public UserService(UserRepository userRepository, GenreRepository genreRepository, EvaluationRepository evaluationRepository) {
+        this.userRepository = userRepository;
+        this.genreRepository = genreRepository;
+        this.evaluationRepository = evaluationRepository;
+    }
+
+    public User getUserById(Long userIdx) {
+        return userRepository.getById(userIdx);
+    }
+
+    public Optional<User> findUserById(Long userIdx) {
+        return userRepository.findById(userIdx);
     }
 
     public Optional<User> findUserEmail(String email) {
@@ -26,11 +42,37 @@ public class UserService {
         return userRepository.saveAndFlush(user);
     }
 
-    //닉네임 유효 여부(false->이미 존재함  /  true->사용 가능)
+    //닉네임 유효 여부(true->이미 존재함  /  false->사용 가능)
     public boolean isExistedNickname(String nickname){
-        if (userRepository.findUserByNickname(nickname).isPresent())
+        return userRepository.findUserByNickname(nickname).isPresent();
+    }
+
+    public void updateUser(User user){
+        userRepository.save(user);
+    }
+
+    public boolean saveUser(User user) {
+        try {
+            userRepository.save(user);
             return true;
-        else
+        } catch (Exception e) {
             return false;
+        }
+    }
+
+    public void deleteUser(User user){
+        userRepository.delete(user);
+    }
+
+    public Genre findGenreByGenreIdx(int genreIdx){
+        return genreRepository.findGenreByGenreIdx(genreIdx).orElse(null);
+    }
+
+    public Evaluation getEvaluation(Long userIdx){
+        return evaluationRepository.findByUser_UserIdx(userIdx).orElse(null);
+    }
+
+    public void saveEvaluation(Evaluation evaluation){
+        evaluationRepository.save(evaluation);
     }
 }

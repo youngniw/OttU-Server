@@ -7,15 +7,15 @@ import lombok.Setter;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "platform")
+@Table(name = "user_genre")
 @NoArgsConstructor
 @Getter
 @Setter
-public class Platform {
+public class UserGenre {
     @Id
-    @Column(name = "platform_idx")
-    private int platformIdx;
+    @Column(name = "user_idx")
+    private Long userIdx;
 
-    @Column(name="platform_name")
-    private String platformName;
+    @Column(name="genre_idx")
+    private int genreIdx;
 }

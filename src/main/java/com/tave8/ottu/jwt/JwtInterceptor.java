@@ -13,8 +13,6 @@ public class JwtInterceptor implements HandlerInterceptor {
     @Autowired
     private JwtUtils jwtUtils;
 
-    //TODO: 확인 요망!!!!!!!!!!!!!!!!
-
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String token = request.getHeader("authorization");
