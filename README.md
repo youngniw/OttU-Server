@@ -1,6 +1,6 @@
 # OttU-Server
 
-![OttU_main_UI](https://user-images.githubusercontent.com/78736070/150719408-0d4046a8-a743-492a-9167-eb9cade6a090.png)
+![OttU_main_UI](https://user-images.githubusercontent.com/78736070/151648974-25db8ad3-dd2e-44c7-951f-868cc18b1d1b.png)
 ## OTT 사용자를 위한 OTT 통합 관리 서비스
 
 ### 개발 환경
